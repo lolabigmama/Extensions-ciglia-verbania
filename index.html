@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it" data-booking-api="">
+<html lang="it" data-booking-api="https://lcfdshnpsgaaqmyupzcy.supabase.co/functions/v1/booking-api">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6e8e7"><meta name="description" content="Extensions Ciglia Verbania — un rituale dedicato al tuo sguardo. Scopri i prodotti e richiedi il tuo appuntamento online.">
@@ -34,132 +34,153 @@
 .photo-caption{position:absolute;z-index:3;left:24px;bottom:20px;padding:8px 12px;background:#fffaf7dd;color:#895b66;font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;backdrop-filter:blur(8px)}
 @media(max-width:800px){.product-jar.real-photo-frame{width:185px;height:310px}.story-jar.real-photo-frame{width:180px;height:300px}.product-photo.kit-main{width:76%;left:1%}.product-photo.kit-detail{width:45%;height:55%;right:0}.photo-caption{left:14px;bottom:14px;font-size:7px}}
 
+
+/* Minimal live calendar layout */
+body{background:#fbf6f2;color:#3e3033}
+.top{position:sticky;top:0;z-index:20;background:#fbf6f2ee;backdrop-filter:blur(14px);border-bottom:1px solid #eadbd6}
+.top-inner{min-height:68px}
+.brand-name{font-size:15px}
+.nav{display:none!important}
+main{padding-top:0}
+.live-calendar{min-height:calc(100svh - 68px);padding:clamp(18px,4vw,42px) 0 34px;scroll-margin-top:68px}
+.live-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:clamp(18px,4vw,48px);align-items:start}
+.calendar-panel,.booking-panel{background:#fffdfa;border:1px solid #eadbd6;padding:clamp(16px,3vw,30px);box-shadow:0 18px 55px #79555d0d}
+.calendar-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+.calendar-title h1{font:italic clamp(27px,4vw,40px)/1.1 var(--serif);font-weight:400;margin:0}
+.month-switch{display:flex;gap:8px;align-items:center}
+.month-switch button,.day-cell,.time-chip{border:1px solid #e5d3cf;background:#fffaf7;color:#704a53;cursor:pointer}
+.month-switch button{width:38px;height:38px;font-size:20px}
+.month-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;min-width:116px;text-align:center}
+.weekdays,.days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.weekdays span{text-align:center;font-size:10px;color:#97747a;padding:7px 0}
+.day-cell{aspect-ratio:1;border-radius:3px;font-size:13px}
+.day-cell:disabled{opacity:.22;cursor:default}
+.day-cell.selected{background:#80545e;color:white;border-color:#80545e}
+.day-cell.today{box-shadow:inset 0 0 0 1px #a97b83}
+.day-cell:not(:disabled):hover{border-color:#80545e}
+.calendar-help{font-size:12px;color:#927b7c;margin:16px 0 0;min-height:18px}
+.booking-panel h2{font:italic 25px var(--serif);font-weight:400;margin:0 0 18px}
+.field{margin-top:14px}
+.field label{font-size:11px}
+.field input,.field select,.field textarea{width:100%;min-height:44px;border:1px solid #e4d2ce;background:#fff;color:#49373b;padding:10px 12px;font:inherit}
+.time-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.time-chip{padding:11px 5px;font-size:12px}
+.time-chip.selected{background:#80545e;color:white;border-color:#80545e}
+.booking-submit{width:100%;margin-top:20px;padding:14px;background:#80545e;color:white;border:0;font:inherit;cursor:pointer}
+.booking-submit:disabled{opacity:.45;cursor:not-allowed}
+.booking-status{font-size:12px;line-height:1.5;color:#80545e;min-height:18px}
+.products{padding:30px 0 50px;scroll-margin-top:85px}
+.products h2{font:italic 30px var(--serif);font-weight:400;margin:0 0 18px}
+.products .shop-grid{gap:14px}
+.products .shop-visual{height:clamp(190px,28vw,300px)}
+.products .shop-info{padding:16px;align-items:center}
+.products .shop-info h3{font-size:19px}
+.products .shop-info p,.products .shop-link,.products .eyebrow{display:none}
+.products .price{font-size:19px}
+.footer,.social{display:none!important}
+@media(max-width:760px){.live-calendar{min-height:auto;padding:14px 0 25px}.live-layout{grid-template-columns:1fr;gap:12px}.calendar-panel,.booking-panel{padding:17px}.calendar-title h1{font-size:30px}.time-list{grid-template-columns:repeat(3,minmax(0,1fr))}.products{padding:20px 0 35px}.products .shop-grid{grid-template-columns:1fr 1fr;gap:9px}.products .shop-visual{height:170px}.products .shop-info{padding:11px}.products .shop-info h3{font-size:15px}.products .price{font-size:16px}}
+@media(max-width:380px){.products .shop-grid{grid-template-columns:1fr}.products .shop-visual{height:220px}.month-label{min-width:96px;font-size:10px}}
 </style>
 </head>
 <body>
 <header class="top" id="topbar"><div class="wrap top-inner">
-<a class="brand" href="#inizio" aria-label="Extensions Ciglia Verbania, inizio pagina"><span class="brand-mark">L</span><span class="brand-name">Extensions Ciglia<small>Verbania · Lash atelier</small></span></a>
-<nav class="nav" id="main-nav" aria-label="Navigazione principale"><a href="#esperienza">L'esperienza</a><a href="#prodotti">Beauty care</a><a href="#prenota" class="nav-cta">Prenota online ↗</a></nav>
-<button class="menu-toggle" id="menu-toggle" aria-label="Apri menu" aria-expanded="false">☰</button>
+<a class="brand" href="#calendario" aria-label="Extensions Ciglia Verbania"><span class="brand-mark">L</span><span class="brand-name">Extensions Ciglia<small>Verbania</small></span></a>
 </div></header>
 <main>
-<section class="hero" id="inizio"><div class="wrap hero-grid">
-<div class="hero-copy"><div class="eyebrow">Extensions Ciglia Verbania · Lash & beauty</div><h1 class="display">Il tuo sguardo.<br><em>La tua firma.</em></h1><p class="intro">Un momento tutto tuo, tra bellezza, cura e piccoli rituali. Scopri il mondo Extensions Ciglia e scegli il tuo prossimo appuntamento.</p><a class="cta" href="#prenota">Prenota il tuo momento <span>↗</span></a><div class="hero-note">Un appuntamento alla volta · Verbania</div></div>
-<div class="hero-object" aria-label="Illustrazione tridimensionale di un prodotto beauty"><div class="orb"></div><div class="orbit-line"></div><div class="product-jar real-photo-frame" id="hero-jar"><img src="assets/products/IMG_9903.jpeg" alt="Lash Bath by Lola, prodotto originale" loading="eager"></div><span class="hero-star s1">✧</span><span class="hero-star s2">✦</span><span class="hero-star s3">✧</span></div>
-</div><div class="scroll-cue">Scorri per scoprire il rituale</div><div class="hero-index">01 / 04</div></section>
-<section class="intro"><div class="wrap intro-grid"><div class="reveal"><div class="eyebrow">Benvenuta nel tuo spazio</div><h2 class="section-title">La bellezza è<br><em>nei dettagli.</em></h2></div><div class="intro-copy reveal"><p class="copy">Qui il tempo rallenta. Ogni appuntamento è un’occasione per dedicarti attenzione, valorizzare il tuo sguardo e sentirti semplicemente te stessa.</p><div class="intro-line"></div><span class="eyebrow">Il tuo momento, il tuo stile.</span></div></div></section>
-<section class="story" id="esperienza"><div class="wrap story-head"><div><div class="eyebrow">Un piccolo viaggio · 01</div><h2 class="section-title">Un rituale, <em>passo dopo passo.</em></h2></div><p class="copy">Scorri la pagina: il prodotto si muove con te, mentre il racconto si trasforma.</p></div>
-<div class="story-stage" id="story-stage"><div class="story-sticky"><div class="story-backdrop"></div><div class="story-product" id="story-product"><div class="product-jar story-jar real-photo-frame" id="story-jar"><img src="assets/products/IMG_9903.jpeg" alt="Lash Bath by Lola, fotografia originale" loading="lazy"></div></div>
-<div class="story-copy"><article class="story-step active"><div class="eyebrow">01 — La cura</div><h3>Un gesto delicato, ogni giorno.</h3><p>La beauty routine comincia dai piccoli gesti. Scopri il prodotto dedicato alla detersione e rendi speciale il tuo momento di cura.</p></article><article class="story-step"><div class="eyebrow">02 — Il rituale</div><h3>La tua beauty bag, sempre con te.</h3><p>Un kit compatto da tenere a portata di mano: praticità e attenzione ai dettagli, dentro e fuori casa.</p></article><article class="story-step"><div class="eyebrow">03 — Il tuo appuntamento</div><h3>Adesso tocca a te.</h3><p>Quando vuoi dedicarti un momento, scegli una data e consulta gli orari disponibili nel calendario online.</p><a class="cta" href="#prenota">Vai alle prenotazioni <span>↗</span></a></article><div class="story-count" id="story-count">01 / 03</div><div class="story-progress"><span id="story-progress"></span></div></div><div class="story-annotation">Beauty is a feeling · Verbania</div>
+<section class="live-calendar" id="calendario">
+<div class="wrap live-layout">
+<div class="calendar-panel">
+<div class="calendar-title"><h1>Calendario</h1><div class="month-switch"><button id="prev-month" type="button" aria-label="Mese precedente">‹</button><span class="month-label" id="month-label"></span><button id="next-month" type="button" aria-label="Mese successivo">›</button></div></div>
+<div class="weekdays"><span>LUN</span><span>MAR</span><span>MER</span><span>GIO</span><span>VEN</span><span>SAB</span><span>DOM</span></div>
+<div class="days-grid" id="days-grid"></div>
+<p class="calendar-help" id="calendar-help" aria-live="polite">Scegli un giorno per vedere gli orari disponibili.</p>
+</div>
+<div class="booking-panel">
+<h2>Prenota un appuntamento</h2>
+<div class="field"><label for="service">Trattamento</label><select id="service"><option value="">Caricamento…</option></select></div>
+<div class="field"><label>Orari disponibili</label><div class="time-list" id="time-list"><span class="calendar-help">Seleziona un giorno</span></div></div>
+<form id="booking-form">
+<div class="field"><label for="customer-name">Nome e cognome</label><input id="customer-name" name="customer_name" autocomplete="name" required placeholder="Nome e cognome"></div>
+<div class="field"><label for="customer-email">Email</label><input id="customer-email" name="customer_email" type="email" autocomplete="email" required placeholder="Email"></div>
+<div class="field"><label for="booking-notes">Note (facoltative)</label><textarea id="booking-notes" name="notes" rows="2" placeholder="Note"></textarea></div>
+<button class="booking-submit" id="booking-submit" type="submit" disabled>Conferma richiesta</button>
+<p class="booking-status" id="booking-status" role="status" aria-live="polite"></p>
+</form>
+</div>
+</div>
+</section>
+<section class="products" id="prodotti"><div class="wrap"><h2>Listino prodotti</h2>
+<div class="shop-grid">
+<article class="shop-card"><div class="shop-visual product-gallery"><img class="product-photo kit-main" src="assets/products/IMG_9904.jpeg" alt="Valigetta kit"><img class="product-photo kit-detail" src="assets/products/IMG_9905.jpeg" alt="Dettaglio kit"></div><div class="shop-info"><div><h3>Valigetta kit</h3></div><div class="price">15 €</div></div></article>
+<article class="shop-card"><div class="shop-visual product-gallery"><img class="product-photo lash-main" src="assets/products/IMG_9903.jpeg" alt="Whipped Shampoo Lash Bath by Lola"></div><div class="shop-info"><div><h3>Whipped Shampoo</h3></div><div class="price">20 €</div></div></article>
 </div></div></section>
-<section class="values"><div class="wrap"><div class="values-top"><div class="reveal"><div class="eyebrow">La filosofia</div><h2 class="section-title">Semplice.<br><em>Personale.</em></h2></div><p class="copy reveal">Un’esperienza costruita intorno a te: dalla scelta del trattamento al momento in cui ti accomodi, ogni dettaglio merita attenzione.</p></div><div class="value-grid reveal"><article class="value"><span class="value-num">01</span><h3>Ascolto</h3><p>Il punto di partenza è capire cosa desideri e quale risultato immagini.</p></article><article class="value"><span class="value-num">02</span><h3>Precisione</h3><p>Ogni dettaglio del tuo appuntamento viene seguito con cura.</p></article><article class="value"><span class="value-num">03</span><h3>Il tuo tempo</h3><p>Uno spazio dedicato a te, da prenotare con semplicità online.</p></article></div></div></section>
-<section class="shop" id="prodotti"><div class="wrap"><div class="shop-head"><div><div class="eyebrow">Beauty care · 02</div><h2 class="section-title">I piccoli alleati<br><em>del tuo rituale.</em></h2></div><p class="copy">Una selezione di prodotti disponibili su richiesta. Prezzi e formati sono quelli comunicati dalla titolare.</p></div>
-<div class="shop-grid"><article class="shop-card reveal"><div class="shop-visual product-gallery"><img class="product-photo kit-main" src="assets/products/IMG_9904.jpeg" alt="Valigetta kit originale, fotografia 1" loading="lazy"><img class="product-photo kit-detail" src="assets/products/IMG_9905.jpeg" alt="Valigetta kit originale, fotografia 2" loading="lazy"><span class="photo-caption">IL KIT · 60 ML</span></div><div class="shop-info"><div><div class="eyebrow">Beauty essentials</div><h3>Valigetta kit</h3><p>Kit in valigetta · flacone da 60 ml</p><a class="shop-link" href="https://www.instagram.com/extensionscigliaverbania/" target="_blank" rel="noopener noreferrer">Chiedi informazioni <span>↗</span></a></div><div class="price">15 €</div></div></article>
-<article class="shop-card reveal"><div class="shop-visual product-gallery"><img class="product-photo lash-main" src="assets/products/IMG_9903.jpeg" alt="Lash Bath by Lola, Whipped Shampoo" loading="lazy"><span class="photo-caption">LASH BATH BY LOLA</span></div><div class="shop-info"><div><div class="eyebrow">Lash care by Lola</div><h3>Whipped Shampoo</h3><p>100 ml · Detersione delicata</p><a class="shop-link" href="https://www.instagram.com/extensionscigliaverbania/" target="_blank" rel="noopener noreferrer">Chiedi informazioni <span>↗</span></a></div><div class="price">20 €</div></div></article></div><p class="shop-note">Disponibilità e consegna da concordare direttamente con la titolare. I prodotti non vengono acquistati tramite questo sito.</p></div></section>
-<section class="booking" id="prenota"><div class="wrap booking-grid"><div class="booking-copy reveal"><div class="eyebrow">Il tuo prossimo appuntamento · 03</div><h2 class="section-title">Il tuo momento<br><em>comincia qui.</em></h2><p class="copy">Scegli il trattamento, consulta il calendario e invia la richiesta in pochi passaggi. Il calendario online verrà attivato dopo il collegamento del sistema di prenotazione della titolare.</p><div class="booking-stamp">just for<br>you</div></div>
-<div class="booking-card reveal"><div class="booking-card-head"><strong>Richiedi un appuntamento</strong><span>Online · Europe/Rome</span></div><div class="booking-disabled" id="booking-disabled">Il calendario automatico è in fase di attivazione. Nel frattempo puoi richiedere un appuntamento direttamente su Instagram. <a href="https://www.instagram.com/extensionscigliaverbania/" target="_blank" rel="noopener noreferrer">Scrivi a @extensionscigliaverbania ↗</a></div>
-<form id="booking-form" novalidate><div class="field-grid"><div class="field"><label for="customer-name">Nome e cognome</label><input id="customer-name" name="customer_name" autocomplete="name" required placeholder="Il tuo nome" disabled></div><div class="field"><label for="customer-email">Email</label><input id="customer-email" name="customer_email" type="email" autocomplete="email" required placeholder="nome@email.com" disabled></div><div class="field full"><label for="service">Trattamento</label><select id="service" name="service_id" required disabled><option value="">In attesa del calendario</option></select></div><div class="field"><label for="booking-date">Data</label><input id="booking-date" name="date" type="date" required disabled></div><div class="field"><label for="booking-time">Orario disponibile</label><select id="booking-time" name="starts_at" required disabled><option value="">Seleziona prima una data</option></select></div><div class="field full"><label for="booking-notes">Note (facoltative)</label><textarea id="booking-notes" name="notes" placeholder="Aggiungi un dettaglio utile" disabled></textarea></div></div><button class="booking-submit" id="booking-submit" type="submit" disabled>Calendario in attivazione</button><p class="booking-status" id="booking-status" role="status" aria-live="polite"></p><p class="booking-privacy">I dati inseriti saranno utilizzati esclusivamente per gestire la richiesta di appuntamento. Informativa privacy e consenso verranno completati prima dell'attivazione delle prenotazioni.</p></form></div></div></section>
-<section class="social"><div class="wrap"><div class="eyebrow">Segui il mondo beauty</div><h2 class="section-title">Un dettaglio alla volta.<br><em>Ci vediamo su Instagram.</em></h2><p>Novità, prodotti e aggiornamenti da Extensions Ciglia Verbania.</p><a class="social-link" href="https://www.instagram.com/extensionscigliaverbania/" target="_blank" rel="noopener noreferrer">@extensionscigliaverbania <span>↗</span></a></div></section>
-</main><footer class="footer"><div class="wrap footer-inner"><div class="footer-brand">Extensions Ciglia Verbania</div><small>DEMO CONCETTUALE · PRENOTAZIONI NON ANCORA ATTIVE</small><a href="#inizio">Torna su ↑</a></div></footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const topbar = document.getElementById("topbar");
-  const menu = document.getElementById("main-nav");
-  const toggle = document.getElementById("menu-toggle");
-  const apiBase = (document.documentElement.dataset.bookingApi || "").trim().replace(/\/$/, "");
-  const form = document.getElementById("booking-form");
-  const bookingStatus = document.getElementById("booking-status");
-  const bookingDisabled = document.getElementById("booking-disabled");
-  const serviceSelect = document.getElementById("service");
-  const dateInput = document.getElementById("booking-date");
-  const timeSelect = document.getElementById("booking-time");
-  const submit = document.getElementById("booking-submit");
-  const fields = [...form.querySelectorAll("input,select,textarea,button")];
-  toggle.addEventListener("click", () => {
-    const open = menu.classList.toggle("open");
-    toggle.setAttribute("aria-expanded", String(open));
-    toggle.textContent = open ? "×" : "☰";
-  });
-  menu.querySelectorAll("a").forEach(a => a.addEventListener("click", () => {
-    menu.classList.remove("open"); toggle.setAttribute("aria-expanded","false"); toggle.textContent="☰";
-  }));
-  const onScroll = () => {
-    topbar.classList.toggle("scrolled", window.scrollY > 30);
-    if (reduceMotion) return;
-    const heroJar = document.getElementById("hero-jar");
-    const r = document.querySelector(".hero").getBoundingClientRect();
-    const p = Math.max(0, Math.min(1, -r.top / Math.max(1, r.height)));
-    heroJar.style.transform = "translate3d(0,"+(p*42)+"px,0) rotateY("+(-23+p*18)+"deg) rotateZ("+(-7+p*5)+"deg)";
-  };
-  window.addEventListener("scroll", onScroll, {passive:true}); onScroll();
-  const revealObserver = new IntersectionObserver(entries => entries.forEach(entry => {
-    if(entry.isIntersecting){entry.target.classList.add("visible");revealObserver.unobserve(entry.target);}
-  }), {threshold:.12});
-  document.querySelectorAll(".reveal").forEach(el => revealObserver.observe(el));
-  const storyStage = document.getElementById("story-stage");
-  const storyJar = document.getElementById("story-jar");
-  const storyProduct = document.getElementById("story-product");
-  const steps = [...document.querySelectorAll(".story-step")];
-  const storyCount = document.getElementById("story-count");
-  const progress = document.getElementById("story-progress");
-  let ticking = false;
-  const updateStory = () => {
-    const rect = storyStage.getBoundingClientRect();
-    const total = Math.max(1, rect.height - window.innerHeight);
-    const p = Math.max(0, Math.min(1, -rect.top / total));
-    const idx = Math.min(2, Math.floor(p * 3));
-    steps.forEach((step,i)=>step.classList.toggle("active",i===idx));
-    storyCount.textContent = "0"+(idx+1)+" / 03";
-    progress.style.width = Math.min(100,p*100)+"%";
-    if(!reduceMotion){
-      const y = p * 125 - 45, rot = -23 + p * 48, scale = 1 + Math.sin(p*Math.PI)*.12;
-      storyProduct.style.transform = "translate3d(0,"+y+"px,0) scale("+scale+")";
-      storyJar.style.transform = "rotateY("+rot+"deg) rotateZ("+(7-p*17)+"deg)";
-    }
-    ticking = false;
-  };
-  window.addEventListener("scroll",()=>{if(!ticking){requestAnimationFrame(updateStory);ticking=true;}},{passive:true});
-  updateStory();
-  if(apiBase){
-    const setEnabled = enabled => fields.forEach(el => el.disabled = !enabled);
-    const localDate = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-    dateInput.min = localDate(new Date());
-    const loadSlots = async () => {
-      timeSelect.innerHTML='<option value="">Caricamento orari…</option>';
-      timeSelect.disabled=true; submit.disabled=true;
-      if(!serviceSelect.value||!dateInput.value) return;
-      try{
-        const q=new URLSearchParams({service_id:serviceSelect.value,date:dateInput.value});
-        const r=await fetch(apiBase+"/public/availability?"+q); if(!r.ok) throw new Error("Impossibile leggere le disponibilità");
-        const data=await r.json(); timeSelect.innerHTML='<option value="">Scegli un orario</option>';
-        (data.slots||[]).forEach(slot=>{const d=new Date(slot.starts_at);const o=document.createElement("option");o.value=slot.starts_at;o.textContent=new Intl.DateTimeFormat("it-IT",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Rome"}).format(d);timeSelect.append(o);});
-        if(!(data.slots||[]).length) timeSelect.innerHTML='<option value="">Nessun orario disponibile</option>';
-        timeSelect.disabled=false; submit.disabled=!(data.slots||[]).length;
-      }catch(e){timeSelect.innerHTML='<option value="">Disponibilità non raggiungibili</option>';bookingStatus.textContent=e.message;}
-    };
-    const loadServices = async () => {
-      try {
-        const r=await fetch(apiBase+"/public/services"); if(!r.ok) throw new Error("Servizi non disponibili");
-        const data=await r.json();
-        serviceSelect.innerHTML='<option value="">Seleziona un trattamento</option>';
-        (data.services||[]).forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name;serviceSelect.append(o);});
-        if(!(data.services||[]).length) throw new Error("Nessun trattamento configurato");
-        setEnabled(true); bookingDisabled.hidden=true; submit.textContent="Invia richiesta di appuntamento";
-        serviceSelect.addEventListener("change",loadSlots); dateInput.addEventListener("change",loadSlots);
-      } catch(e) { bookingDisabled.textContent="Il calendario non è ancora disponibile. Riprova più tardi."; bookingStatus.textContent=e.message; }
-    };
-    timeSelect.addEventListener("change",()=>submit.disabled=!timeSelect.value);
-    form.addEventListener("submit",async e=>{
-      e.preventDefault(); bookingStatus.textContent="Invio richiesta…";submit.disabled=true;
-      const payload={service_id:serviceSelect.value,starts_at:timeSelect.value,customer_name:form.elements.customer_name.value.trim(),customer_email:form.elements.customer_email.value.trim(),notes:form.elements.notes.value.trim()};
-      try{const r=await fetch(apiBase+"/public/appointments",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});const data=await r.json();if(!r.ok)throw new Error(data.error||"Richiesta non riuscita");bookingStatus.textContent="Richiesta inviata. L'appuntamento sarà confermato dopo la verifica.";form.reset();await loadSlots();}
-      catch(err){bookingStatus.textContent=err.message;submit.disabled=false;}
-    });
-    loadServices();
-  } else {
-    form.addEventListener("submit",e=>{e.preventDefault();bookingStatus.textContent="Questa è una demo: nessuna prenotazione viene inviata."});
+ const api=document.documentElement.dataset.bookingApi.replace(/\/$/,"");
+ const supabaseUrl="https://lcfdshnpsgaaqmyupzcy.supabase.co";
+ const supabaseKey="sb_publishable_hPr2_W4ck4NXlAMHQZvIXg_0QD7C9M1";
+ const client=window.supabase?.createClient(supabaseUrl,supabaseKey);
+ const $=id=>document.getElementById(id);
+ const service=$("service"), grid=$("days-grid"), monthLabel=$("month-label"), help=$("calendar-help");
+ const times=$("time-list"), submit=$("booking-submit"), status=$("booking-status"), form=$("booking-form");
+ const today=new Date(); today.setHours(0,0,0,0);
+ let month=new Date(today.getFullYear(),today.getMonth(),1), selectedDate=null, selectedSlot=null, services=[];
+ const pad=n=>String(n).padStart(2,"0");
+ const dateKey=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+ const months=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+ function renderMonth(){
+  monthLabel.textContent=months[month.getMonth()]+" "+month.getFullYear(); grid.innerHTML="";
+  const first=new Date(month.getFullYear(),month.getMonth(),1); const offset=(first.getDay()+6)%7;
+  const count=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
+  for(let i=0;i<offset;i++){const blank=document.createElement("span");grid.append(blank);}
+  for(let n=1;n<=count;n++){
+   const d=new Date(month.getFullYear(),month.getMonth(),n), key=dateKey(d), b=document.createElement("button");
+   b.type="button";b.className="day-cell";b.textContent=n;
+   const past=d<today;b.disabled=past;
+   if(key===dateKey(today))b.classList.add("today");
+   if(key===selectedDate)b.classList.add("selected");
+   b.addEventListener("click",()=>{selectedDate=key;selectedSlot=null;submit.disabled=true;renderMonth();loadSlots();});
+   grid.append(b);
   }
+  $("prev-month").disabled=month.getFullYear()===today.getFullYear()&&month.getMonth()===today.getMonth();
+ }
+ $("prev-month").addEventListener("click",()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);renderMonth();});
+ $("next-month").addEventListener("click",()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderMonth();});
+ async function loadServices(){
+  try{const r=await fetch(api+"/public/services");if(!r.ok)throw Error("Servizi non disponibili");const data=await r.json();services=data.services||[];
+   service.innerHTML='<option value="">Seleziona il trattamento</option>';
+   services.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name+" · "+(s.price_cents/100).toLocaleString("it-IT",{style:"currency",currency:"EUR"})+" · 2 ore";service.append(o);});
+   if(services.length){service.value=services[0].id;loadSlots();}
+  }catch(e){service.innerHTML='<option value="">Calendario in aggiornamento</option>';help.textContent="Impossibile collegarsi al calendario. Riprova tra poco.";}
+ }
+ async function loadSlots(){
+  selectedSlot=null;submit.disabled=true;times.innerHTML="";status.textContent="";
+  if(!selectedDate){help.textContent="Scegli un giorno per vedere gli orari disponibili.";return;}
+  if(!service.value){help.textContent="Seleziona un trattamento.";return;}
+  help.textContent=new Date(selectedDate+"T12:00:00").toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+  times.innerHTML='<span class="calendar-help">Caricamento…</span>';
+  try{
+   const q=new URLSearchParams({service_id:service.value,date:selectedDate});
+   const r=await fetch(api+"/public/availability?"+q);if(!r.ok)throw Error("Disponibilità non raggiungibili");
+   const data=await r.json();times.innerHTML="";
+   if(!data.slots?.length){times.innerHTML='<span class="calendar-help">Nessun orario disponibile per questa data.</span>';return;}
+   data.slots.forEach(slot=>{const b=document.createElement("button");b.type="button";b.className="time-chip";b.textContent=new Intl.DateTimeFormat("it-IT",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Rome"}).format(new Date(slot.starts_at));b.addEventListener("click",()=>{selectedSlot=slot;b.classList.add("selected");[...times.children].filter(x=>x!==b).forEach(x=>x.classList.remove("selected"));submit.disabled=false;});times.append(b);});
+  }catch(e){times.innerHTML='<span class="calendar-help">Errore di connessione.</span>';status.textContent=e.message;}
+ }
+ service.addEventListener("change",loadSlots);
+ form.addEventListener("submit",async e=>{
+  e.preventDefault();if(!selectedSlot)return;submit.disabled=true;status.textContent="Invio richiesta…";
+  try{const payload={service_id:service.value,starts_at:selectedSlot.starts_at,customer_name:form.elements.customer_name.value.trim(),customer_email:form.elements.customer_email.value.trim(),notes:form.elements.notes.value.trim()};
+   const r=await fetch(api+"/public/appointments",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
+   const data=await r.json();if(!r.ok)throw Error(data.error||"Prenotazione non riuscita");
+   status.textContent="Richiesta inviata, in attesa di conferma.";form.reset();await loadSlots();
+  }catch(err){status.textContent=err.message;submit.disabled=!selectedSlot;}
+ });
+ renderMonth();loadServices();
+ if(client){client.channel("calendar").on("broadcast",{event:"calendar_changed"},()=>{if(selectedDate)loadSlots();}).subscribe();}
+ setInterval(()=>{if(selectedDate)loadSlots();},30000);
 })();
 </script>
 </body></html>
