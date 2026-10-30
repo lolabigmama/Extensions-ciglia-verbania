@@ -37,13 +37,14 @@ async function availability(serviceId: string, date: string) {
   if (se || !service) throw new Error("Trattamento non disponibile.");
   const { start, end } = dayRange(date);
   const weekday = new Date(date + "T12:00:00Z").getUTCDay();
-  const [{ data: hours, error: he }, { data: appts, error: ae }, { data: blocks, error: be }, { data: settings }] = await Promise.all([
+  const [{ data: hours, error: he }, { data: specialSlots, error: se2 }, { data: appts, error: ae }, { data: blocks, error: be }, { data: settings }] = await Promise.all([
     db.from("business_hours").select("opens_at,closes_at").eq("weekday", weekday).eq("is_active", true).order("opens_at"),
+    db.from("special_slots").select("starts_at").eq("slot_date", date).order("starts_at"),
     db.from("appointments").select("starts_at,ends_at").lt("starts_at", end.toISOString()).gt("ends_at", start.toISOString()).in("status", ["pending","confirmed"]),
     db.from("blocked_dates").select("starts_at,ends_at").lt("starts_at", end.toISOString()).gt("ends_at", start.toISOString()),
     db.from("booking_settings").select("timezone,slot_interval_minutes,maximum_booking_days,minimum_advance_hours").eq("id",1).maybeSingle()
   ]);
-  if (he || ae || be) throw new Error("Errore nella lettura del calendario.");
+  if (he || se2 || ae || be) throw new Error("Errore nella lettura del calendario.");
   const cfg = settings ?? { slot_interval_minutes: 15, maximum_booking_days: 90, minimum_advance_hours: 2 };
   const now = Date.now();
   const maxDate = now + Number(cfg.maximum_booking_days) * 86400000;
@@ -51,14 +52,19 @@ async function availability(serviceId: string, date: string) {
   const busy = [...(appts ?? []), ...(blocks ?? [])].map(x => [new Date(x.starts_at).getTime(),new Date(x.ends_at).getTime()]);
   const duration = Number(service.duration_minutes) * 60000;
   const slots: { starts_at: string; ends_at: string }[] = [];
-  for (const h of hours ?? []) {
-    const opens = fromZonedTime(date + "T" + h.opens_at, TZ).getTime();
-    const closes = fromZonedTime(date + "T" + h.closes_at, TZ).getTime();
-    for (let t=opens; t+duration<=closes; t+=Number(cfg.slot_interval_minutes)*60000) {
-      if (t < minTime || t > maxDate) continue;
-      if (busy.some(([a,b]) => t < b && a < t+duration)) continue;
-      slots.push({ starts_at:new Date(t).toISOString(), ends_at:new Date(t+duration).toISOString() });
-    }
+  const candidates: number[] = (specialSlots?.length
+    ? specialSlots.map(x => fromZonedTime(date + "T" + x.starts_at, TZ).getTime())
+    : (hours ?? []).flatMap(h => {
+        const opens = fromZonedTime(date + "T" + h.opens_at, TZ).getTime();
+        const closes = fromZonedTime(date + "T" + h.closes_at, TZ).getTime();
+        const starts: number[] = [];
+        for (let t=opens; t+duration<=closes; t+=Number(cfg.slot_interval_minutes)*60000) starts.push(t);
+        return starts;
+      }));
+  for (const t of candidates) {
+    if (t < minTime || t > maxDate || t+duration > end.getTime()) continue;
+    if (busy.some(([a,b]) => t < b && a < t+duration)) continue;
+    slots.push({ starts_at:new Date(t).toISOString(), ends_at:new Date(t+duration).toISOString() });
   }
   return { date, timezone: TZ, service, slots };
 }
@@ -100,6 +106,22 @@ Deno.serve(async (req: Request) => {
       if (!owner(req)) return json({error:"Accesso titolare non configurato o non autorizzato."},401,headers);
       if (req.method === "GET" && path === "hours") {
         const {data,error}=await db.from("business_hours").select("*").order("weekday").order("opens_at"); if(error) throw error; return json({hours:data},200,headers);
+      }
+      if (req.method === "GET" && path === "special-slots") {
+        const from=url.searchParams.get("from") ?? ""; const to=url.searchParams.get("to") ?? "";
+        if(!validDate(from)||!validDate(to)) return json({error:"Intervallo date non valido."},400,headers);
+        const {data,error}=await db.from("special_slots").select("*").gte("slot_date",from).lte("slot_date",to).order("slot_date").order("starts_at");
+        if(error) throw error; return json({special_slots:data},200,headers);
+      }
+      if (req.method === "POST" && path === "special-slots") {
+        const b=await req.json(); const date=String(b.slot_date??""); const time=String(b.starts_at??"");
+        if(!validDate(date)||!/^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$/.test(time)) return json({error:"Data o orario non valido."},400,headers);
+        const {data,error}=await db.from("special_slots").upsert({slot_date:date,starts_at:time},{onConflict:"slot_date,starts_at"}).select().single();
+        if(error) throw error; await notifyCalendar(); return json({special_slot:data},201,headers);
+      }
+      if (req.method === "DELETE" && path === "special-slots") {
+        const id=url.searchParams.get("id"); if(!id) return json({error:"ID mancante."},400,headers);
+        const {error}=await db.from("special_slots").delete().eq("id",id); if(error) throw error; await notifyCalendar(); return json({ok:true},200,headers);
       }
       if (req.method === "POST" && path === "hours") {
         const b=await req.json(); const weekday=Number(b.weekday);
