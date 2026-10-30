@@ -1,48 +1,57 @@
 openapi: 3.1.0
 info:
-  title: Extensions Ciglia Verbania — Booking API
-  version: 0.1.0
-  description: Private assistant API for Lola. Reads real availability, lists appointments and manages calendar blocks. All dates use Europe/Rome.
+  title: Extensions Ciglia Verbania Calendar
+  version: 1.0.0
+  description: API privata del calendario condiviso con il GPT della titolare. Orari in Europe/Rome.
 servers:
-  - url: https://YOUR_PROJECT_REF.supabase.co/functions/v1/booking-api
-security:
-  - OwnerApiKey: []
+  - url: https://lcfdshnpsgaaqmyupzcy.supabase.co/functions/v1/booking-api
 paths:
-  /availability:
+  /owner/hours:
     get:
-      operationId: getAvailability
-      summary: Check real available appointment slots
+      operationId: listWorkingHours
+      summary: Legge i giorni e gli orari di lavoro configurati
+      security:
+        - OwnerApiKey: []
+      responses:
+        "200": { description: Elenco degli orari }
+    post:
+      operationId: addWorkingHours
+      summary: Aggiunge una fascia lavorativa per un giorno della settimana
+      description: Usare solo dopo che la titolare comunica o conferma il giorno e l'orario. weekday usa 0=domenica, 1=lunedì, fino a 6=sabato.
+      security:
+        - OwnerApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [weekday, opens_at, closes_at]
+              properties:
+                weekday: { type: integer, minimum: 0, maximum: 6 }
+                opens_at: { type: string, example: "09:00" }
+                closes_at: { type: string, example: "18:00" }
+                is_active: { type: boolean, default: true }
+      responses:
+        "201": { description: Fascia oraria aggiunta }
+    delete:
+      operationId: removeWorkingHours
+      summary: Rimuove una fascia lavorativa tramite ID
+      security:
+        - OwnerApiKey: []
       parameters:
-        - name: date
-          in: query
-          required: true
-          schema: { type: string, format: date }
-          description: Local date in Europe/Rome, YYYY-MM-DD.
-        - name: service_id
+        - name: id
           in: query
           required: true
           schema: { type: string, format: uuid }
       responses:
-        "200":
-          description: Available slots
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  date: { type: string, format: date }
-                  timezone: { type: string, example: Europe/Rome }
-                  slots:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        starts_at: { type: string, format: date-time }
-                        ends_at: { type: string, format: date-time }
-  /appointments:
+        "200": { description: Fascia rimossa }
+  /owner/appointments:
     get:
-      operationId: listAppointments
-      summary: List appointments in a date range
+      operationId: listOwnerAppointments
+      summary: Legge gli appuntamenti in un intervallo di date
+      security:
+        - OwnerApiKey: []
       parameters:
         - name: from
           in: query
@@ -52,22 +61,62 @@ paths:
           in: query
           required: true
           schema: { type: string, format: date }
-        - name: status
-          in: query
-          schema: { type: string, enum: [pending, confirmed, cancelled] }
       responses:
-        "200": { description: Appointments in the requested range }
+        "200": { description: Appuntamenti e dettagli per la titolare }
+  /owner/blocks:
     post:
-      operationId: createAppointment
-      summary: Create an appointment after rechecking availability
-      description: Rejects overlaps. Use only after an explicit booking request or owner instruction.
+      operationId: blockCalendarTime
+      summary: Blocca un intervallo di calendario
+      security:
+        - OwnerApiKey: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [service_id, starts_at, customer_name]
+              required: [starts_at, ends_at]
+              properties:
+                starts_at: { type: string, format: date-time }
+                ends_at: { type: string, format: date-time }
+                reason: { type: string, maxLength: 240 }
+      responses:
+        "201": { description: Intervallo bloccato }
+  /public/services:
+    get:
+      operationId: listPublicServices
+      summary: Elenca i quattro trattamenti prenotabili con prezzo e durata
+      security: []
+      responses:
+        "200": { description: Trattamenti attivi }
+  /public/availability:
+    get:
+      operationId: getPublicAvailability
+      summary: Legge gli orari prenotabili per un trattamento e una data
+      security: []
+      parameters:
+        - name: service_id
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: date
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        "200": { description: Slot disponibili nel fuso Europe/Rome }
+  /public/appointments:
+    post:
+      operationId: requestPublicAppointment
+      summary: Invia una richiesta di appuntamento
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [service_id, starts_at, customer_name, customer_email]
               properties:
                 service_id: { type: string, format: uuid }
                 starts_at: { type: string, format: date-time }
@@ -75,51 +124,8 @@ paths:
                 customer_email: { type: string, format: email }
                 notes: { type: string, maxLength: 1000 }
       responses:
-        "201": { description: Appointment created }
-        "409": { description: Slot no longer available }
-  /blocks:
-    get:
-      operationId: listCalendarBlocks
-      summary: List owner calendar blocks
-      parameters:
-        - name: from
-          in: query
-          required: true
-          schema: { type: string, format: date }
-        - name: to
-          in: query
-          required: true
-          schema: { type: string, format: date }
-      responses:
-        "200": { description: Calendar blocks }
-    post:
-      operationId: createCalendarBlock
-      summary: Block a date or time range for the owner
-      description: Only after Lola explicitly asks to block the stated period.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [starts_at, ends_at, reason]
-              properties:
-                starts_at: { type: string, format: date-time }
-                ends_at: { type: string, format: date-time }
-                reason: { type: string, maxLength: 240 }
-      responses:
-        "201": { description: Calendar block created }
-  /blocks/{block_id}:
-    delete:
-      operationId: deleteCalendarBlock
-      summary: Remove an existing owner block
-      parameters:
-        - name: block_id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        "204": { description: Block removed }
+        "201": { description: Richiesta inserita in attesa di conferma }
+        "409": { description: Orario non più disponibile }
 components:
   securitySchemes:
     OwnerApiKey:
