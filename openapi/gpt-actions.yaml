@@ -46,6 +46,53 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         "200": { description: Fascia rimossa }
+  /owner/special-slots:
+    get:
+      operationId: listSpecialAvailability
+      summary: Legge le disponibilità eccezionali per date specifiche
+      security:
+        - OwnerApiKey: []
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        "200": { description: Slot specifici configurati }
+    post:
+      operationId: addSpecialAvailability
+      summary: Aggiunge un orario disponibile solo per la data indicata
+      description: Usare quando la titolare comunica disponibilità per una singola data. L'orario è l'inizio dell'appuntamento e la durata viene presa dal trattamento.
+      security:
+        - OwnerApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slot_date, starts_at]
+              properties:
+                slot_date: { type: string, format: date, example: "2026-11-02" }
+                starts_at: { type: string, example: "10:30" }
+      responses:
+        "201": { description: Disponibilità aggiunta }
+    delete:
+      operationId: removeSpecialAvailability
+      summary: Rimuove una disponibilità specifica tramite ID
+      security:
+        - OwnerApiKey: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Disponibilità rimossa }
   /owner/appointments:
     get:
       operationId: listOwnerAppointments
