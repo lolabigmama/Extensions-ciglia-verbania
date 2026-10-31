@@ -1,7 +1,7 @@
 # Istruzioni di ripristino contesto per l'assistente
 ## Extensions Ciglia Verbania
 
-Questo documento è il manuale di continuità del progetto. Se l'assistente perde la memoria della conversazione, deve leggerlo prima di modificare codice, database, orari o pubblicazione. È una fotografia dello stato verificato al **31 ottobre 2026**; prima di agire verificare sempre lo stato effettivo di GitHub e Supabase, perché questo file può diventare storico.
+Questo documento è il manuale di continuità del progetto. Se l'assistente perde la memoria della conversazione, deve leggerlo prima di modificare codice, database, orari o pubblicazione. È una fotografia dello stato noto al **31 ottobre 2026**; prima di agire verificare sempre lo stato effettivo di GitHub e Supabase, perché questo file può diventare storico.
 
 ---
 
@@ -114,7 +114,7 @@ Campi: `id`, `slot_date`, `starts_at`, `created_at`. Contiene le disponibilità 
 Quando per una data esistono righe in `special_slots`, l'API usa quegli orari specifici e non genera gli orari dalla fascia settimanale per quella data. Per date senza righe speciali usa invece `business_hours`.
 
 ### `appointments`
-Campi principali: `id`, `service_id`, `customer_name`, `customer_email`, `customer_phone`, `customer_notes`, `starts_at`, `ends_at`, `status`, `source`, `created_at`, `updated_at`. Stati enum: `pending`, `confirmed`, `cancelled`. Le richieste dal sito vengono create come `pending`; gli appuntamenti pending e confirmed occupano lo slot e impediscono sovrapposizioni.
+Campi principali attuali: `id`, `service_id`, `customer_name`, `customer_instagram`, `customer_phone`, `customer_notes`, `starts_at`, `ends_at`, `status`, `source`, `created_at`, `updated_at`. La colonna `customer_instagram` è stata aggiunta con migrazione incrementale ed è di tipo text nullable. **Il vecchio campo email non è più usato dal nuovo modulo e il frontend non richiede l'email.** Verificare sempre lo schema live prima di assumere che eventuali colonne legacy siano state eliminate. Stati enum: `pending`, `confirmed`, `cancelled`. Le richieste dal sito vengono create come `pending`; gli appuntamenti pending e confirmed occupano lo slot e impediscono sovrapposizioni.
 
 ### `blocked_dates`
 Campi: `id`, `starts_at`, `ends_at`, `reason`, `created_at`. Contiene intervalli non prenotabili inseriti dalla titolare.
@@ -143,6 +143,8 @@ La migrazione 002 documenta la tabella `special_slots` e i quattro orari del 2 n
 Codice sorgente nel repository: `supabase/functions/booking-api/index.ts`.
 La funzione è distribuita nel progetto Supabase `lcfdshnpsgaaqmyupzcy`, con `verify_jwt = false`. La funzione gestisce CORS, validazione, richieste pubbliche e percorsi privati protetti da chiave dedicata.
 
+**Stato distribuzione noto al 31 ottobre 2026: versione 5 attiva.** La versione 5 include il supporto al nickname Instagram e la selezione del campo nel riepilogo appuntamenti del proprietario. Prima di altri deploy controllare la versione effettivamente attiva.
+
 Variabili ambiente lette dal codice:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -158,6 +160,17 @@ Base URL + percorso:
 - `GET /public/services`: elenca servizi attivi.
 - `GET /public/availability?service_id=<uuid>&date=YYYY-MM-DD`: calcola gli slot liberi per il servizio e la data.
 - `POST /public/appointments`: crea una richiesta appuntamento pending.
+
+Il modulo pubblico attuale raccoglie:
+- nome e cognome (obbligatorio);
+- nickname Instagram (obbligatorio nel form, con eventuale `@` iniziale normalizzato dal backend);
+- note aggiuntive (facoltative).
+
+Il payload invia `customer_name`, `customer_instagram`, `customer_notes`, `service_id` e orario richiesto. Non invia `customer_email`. Il backend valida l'handle Instagram (lunghezza 1-40, caratteri alfanumerici, punto e underscore, con eventuale `@` iniziale rimosso) e salva i dati nella tabella `appointments`.
+
+La risposta al cliente è: **“Richiesta ricevuta, in attesa di conferma.”**
+
+**Non inviare messaggi automatici su Instagram.** La titolare ha richiesto esplicitamente di non inviare messaggi di conferma automatici. Non aggiungere DM automatici, link Instagram automatici o integrazioni di messaggistica senza una nuova richiesta esplicita.
 
 Il calcolo disponibilità:
 1. verifica che il servizio sia attivo;
@@ -200,7 +213,22 @@ Non è stato verificato che `OWNER_ACTION_API_KEY` sia già configurata. Non aff
 
 ---
 
-## 8. Regole per gestire le disponibilità che la titolare comunica in chat
+## 8. Pannello amministratore: stato e istruzioni
+
+**Non risulta implementata una pagina/pannello amministratore all'interno del sito pubblico.** Non inventare URL come `/admin` e non dire alla titolare che esiste un login amministratore già pronto.
+
+Per consultare le prenotazioni attualmente:
+1. aprire il progetto Supabase: https://supabase.com/dashboard/project/lcfdshnpsgaaqmyupzcy
+2. entrare in **Table Editor**;
+3. selezionare la tabella `appointments`.
+
+Qui si possono consultare i dati delle richieste, inclusi nome, nickname Instagram, trattamento, data/ora, note e stato. `pending` significa richiesta ricevuta ma non ancora confermata; `confirmed` significa appuntamento confermato; `cancelled` significa annullato. Non modificare manualmente dati cliente o stati senza istruzioni esplicite e verifica delle regole backend.
+
+È stata discussa come possibile evoluzione una pagina privata “Le mie prenotazioni” sul sito, con autenticazione protetta e funzioni di visualizzazione/conferma/annullamento. **È solo una proposta, non è stata costruita né pubblicata.** Prima di implementarla progettare autenticazione sicura e autorizzazione server-side; non inserire la owner key nel frontend e non proteggere la pagina soltanto nascondendo l'URL.
+
+---
+
+## 9. Regole per gestire le disponibilità che la titolare comunica in chat
 
 ### Se comunica un giorno e un orario senza specificare la ricorrenza
 Chiedere: “Questo orario vale solo per la prossima data oppure si ripete ogni settimana?” Non salvare finché non è chiaro.
@@ -227,20 +255,21 @@ Prima leggere l'ID esatto della riga e la data/ora interessata. Cancellare solo 
 
 ---
 
-## 9. Sicurezza, privacy e limiti
+## 10. Sicurezza, privacy e limiti
 
 - Non esporre service-role key, owner key o dati personali.
 - La chiave publishable nel browser è pubblica per definizione; non usarla per operazioni privilegiate.
 - Le richieste pubbliche non sono confermate automaticamente.
+- Non inviare DM o conferme automatiche Instagram: non richiesti e attualmente esplicitamente esclusi.
 - Prima di considerare il sistema pronto per un uso commerciale completo, completare informativa privacy/consenso, retention e cancellazione dati, rate limiting/anti-abuso e test end-to-end.
 - Le tabelle sensibili non devono ricevere policy anon che consentano accesso ai dati cliente.
 - RLS attivo senza policy pubbliche è intenzionale per le tabelle riservate; la Edge Function usa il ruolo server.
 - Il CORS deve essere limitato al dominio del sito.
-- Non assumere che l'email di conferma, notifiche o pannello admin siano implementati se non verificati nel codice.
+- Non assumere che notifiche o pannello admin siano implementati se non verificati nel codice.
 
 ---
 
-## 10. Cronologia delle attività tecniche svolte
+## 11. Cronologia delle attività tecniche svolte
 
 Questa è la sequenza ricostruita dalla conversazione e dai file attualmente presenti:
 
@@ -259,13 +288,22 @@ Questa è la sequenza ricostruita dalla conversazione e dai file attualmente pre
 13. Aggiornata l'OpenAPI per esporre le operazioni su `/owner/special-slots`.
 14. Registrate e verificate in Supabase le quattro disponibilità del 2 novembre 2026: 10:30, 14:00, 16:00, 18:00.
 15. Aggiornati `README-BOOKING.md` e questo manuale per documentare il funzionamento e la disponibilità speciale.
-16. Il workflow GitHub Actions `41147219267` ha completato build e deploy con esito `success` dopo gli aggiornamenti di documentazione e codice.
+16. Il workflow GitHub Actions `41147219267` ha completato build e deploy con esito `success` dopo gli aggiornamenti precedenti.
+17. Risolto un bug backend `TypeError: URL is not a constructor` causato da shadowing del costruttore nativo `URL`; la versione 4 di `booking-api` aveva risposto HTTP 200 sulle rotte pubbliche di servizi/disponibilità.
+18. Su richiesta della titolare, rimosso il campo email dal modulo di prenotazione e aggiunto il campo obbligatorio `Nickname Instagram`; il campo note è stato rinominato `Note aggiuntive (facoltative)`.
+19. Aggiunta la colonna `customer_instagram` (text nullable) a `public.appointments` tramite migrazione incrementale; non è stata creato un nuovo progetto Supabase.
+20. Distribuita la versione 5 di `booking-api`: valida e salva `customer_instagram`, non richiede email e seleziona il nickname Instagram nel riepilogo proprietario. Non invia DM automatici.
+21. Aggiornato `README-BOOKING.md` per documentare i nuovi campi del modulo e l'assenza di messaggi automatici.
+22. Ultimi commit noti su `main`: `Aggiorna modulo prenotazioni senza email` e `Documenta i nuovi campi del modulo prenotazioni`. Il run GitHub Actions #25 (ID `41149304897`) risultava `waiting` all'ultimo controllo; il run #24 era stato cancellato dopo il push successivo. **Non dare per verificata la pubblicazione delle ultime modifiche finché non si ricontrolla il workflow #25 e il sito live.**
+23. Verificato nel file `index.html` sul branch `main` che il modulo include `customer_instagram`, non richiede `customer_email` e non contiene invio automatico DM/URL Instagram.
+24. Verificato che il repository non contiene nel file `index.html` un pannello amministratore o una route admin integrata.
+25. Alla titolare è stato indicato che può vedere le richieste entrando nel progetto Supabase, **Table Editor → appointments**. È stato proposto come possibile lavoro futuro un pannello privato “Le mie prenotazioni”, ma non è stato implementato.
 
 Nota: alcuni file di documentazione più vecchi (in particolare `BOOKING-ARCHITECTURE.md`, `BACKEND-BUNDLE-FOR-GPT.md` e parte di `README.md`) contengono descrizioni di fase progettuale/demo che non riflettono più il database live. Usare questo manuale, `README-BOOKING.md`, il codice effettivo e l'introspezione Supabase come riferimenti aggiornati. Non copiare le vecchie istruzioni di setup senza verificarle.
 
 ---
 
-## 11. Procedura standard per ogni modifica al sito
+## 12. Procedura standard per ogni modifica al sito
 
 1. Leggere questo file e `README-BOOKING.md`.
 2. Leggere il file esistente dal repository di destinazione e ottenere il suo SHA aggiornato.
@@ -277,13 +315,15 @@ Nota: alcuni file di documentazione più vecchi (in particolare `BOOKING-ARCHITE
 8. Solo allora comunicare il completamento e fornire il link pubblico.
 9. Aggiornare questo manuale e `README-BOOKING.md` quando cambia una configurazione stabile, una rotta, una tabella o una regola operativa.
 
-## 12. Stato aperto / prossime verifiche
+## 13. Stato aperto / prossime verifiche
 
+- [ ] Ricontrollare il workflow GitHub Actions #25 (ID `41149304897`) e verificare il deploy delle modifiche modulo Instagram; il suo stato era `waiting` all'ultimo controllo.
 - [ ] Verificare dal browser che il calendario pubblico mostri correttamente i quattro slot del 2 novembre per ciascun servizio.
 - [ ] Verificare end-to-end una richiesta di prenotazione di test, poi annullarla/rimuoverla in modo controllato se è stata creata.
 - [ ] Impostare e testare `OWNER_ACTION_API_KEY` come secret Supabase e completare l'autenticazione delle GPT Actions.
 - [ ] Verificare il valore di `SITE_ORIGIN` nei secrets Supabase.
 - [ ] Completare privacy, consenso, anti-abuso e policy di conservazione dati prima di promuovere il flusso a prenotazione automatica.
 - [ ] Se la titolare comunicherà orari ricorrenti come inizi discreti, aggiungere il supporto a slot settimanali discreti senza convertire tali orari in fasce continue.
+- [ ] Se richiesto dalla titolare, progettare e realizzare un pannello amministratore privato con autenticazione e autorizzazione server-side. Non esiste ancora una pagina admin sul sito.
 
 Fine del manuale. In caso di dubbio, non indovinare: controllare il codice live e lo schema Supabase, poi chiedere alla titolare il chiarimento minimo necessario.
