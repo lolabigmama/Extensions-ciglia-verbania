@@ -97,7 +97,7 @@ main{padding-top:0}
 </div>
 <div class="booking-panel">
 <h2>Prenota un appuntamento</h2>
-<div class="field"><label for="service">Trattamento</label><select id="service"><option value="">Caricamento…</option></select></div>
+<div class="field"><label for="service">Scegli il trattamento</label><select id="service" required><option value="">Seleziona il trattamento</option><option value="cbe07ae7-7d3d-4171-96db-b841f504bb92">Extensions ciglia one to one · 50 € · 2 ore</option><option value="4dd3cf57-81db-42ed-9c54-9467b6133032">Extensions ciglia volume · 70 € · 2 ore</option><option value="bb810b5c-640f-4aa4-a21d-b296cc6fd1a5">Refill one to one · 40 € · 2 ore</option><option value="f5a6f27b-d5cb-4a8b-b7bf-5e3505979daa">Refill volume · 60 € · 2 ore</option></select></div>
 <div class="field"><label>Orari disponibili</label><div class="time-list" id="time-list"><span class="calendar-help">Seleziona un giorno</span></div></div>
 <form id="booking-form">
 <div class="field"><label for="customer-name">Nome e cognome</label><input id="customer-name" name="customer_name" autocomplete="name" required placeholder="Nome e cognome"></div>
@@ -150,10 +150,13 @@ main{padding-top:0}
  $("next-month").addEventListener("click",()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderMonth();});
  async function loadServices(){
   try{const r=await fetch(api+"/public/services");if(!r.ok)throw Error("Servizi non disponibili");const data=await r.json();services=data.services||[];
-   service.innerHTML='<option value="">Seleziona il trattamento</option>';
-   services.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name+" · "+(s.price_cents/100).toLocaleString("it-IT",{style:"currency",currency:"EUR"})+" · 2 ore";service.append(o);});
-   if(services.length){service.value=services[0].id;loadSlots();}
-  }catch(e){service.innerHTML='<option value="">Calendario in aggiornamento</option>';help.textContent="Impossibile collegarsi al calendario. Riprova tra poco.";}
+   if(services.length){
+    const current=service.value;
+    service.innerHTML='<option value="">Seleziona il trattamento</option>';
+    services.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name+" · "+(s.price_cents/100).toLocaleString("it-IT",{style:"currency",currency:"EUR"})+" · "+(s.duration_minutes/60)+" ore";service.append(o);});
+    if(services.some(s=>s.id===current))service.value=current;
+   }
+  }catch(e){help.textContent="Non riesco ad aggiornare il listino in questo momento. Puoi comunque selezionare il trattamento; gli orari verranno caricati appena il calendario risponde.";}
  }
  async function loadSlots(){
   selectedSlot=null;submit.disabled=true;times.innerHTML="";status.textContent="";
