@@ -101,8 +101,8 @@ main{padding-top:0}
 <div class="field"><label>Orari disponibili</label><div class="time-list" id="time-list"><span class="calendar-help">Seleziona un giorno</span></div></div>
 <form id="booking-form">
 <div class="field"><label for="customer-name">Nome e cognome</label><input id="customer-name" name="customer_name" autocomplete="name" required placeholder="Nome e cognome"></div>
-<div class="field"><label for="customer-email">Email</label><input id="customer-email" name="customer_email" type="email" autocomplete="email" required placeholder="Email"></div>
-<div class="field"><label for="booking-notes">Note (facoltative)</label><textarea id="booking-notes" name="notes" rows="2" placeholder="Note"></textarea></div>
+<div class="field"><label for="customer-instagram">Nickname Instagram</label><input id="customer-instagram" name="customer_instagram" type="text" autocomplete="off" required maxlength="40" placeholder="@nickname"></div>
+<div class="field"><label for="booking-notes">Note aggiuntive (facoltative)</label><textarea id="booking-notes" name="notes" rows="2" maxlength="1000" placeholder="Note aggiuntive"></textarea></div>
 <button class="booking-submit" id="booking-submit" type="submit" disabled>Conferma richiesta</button>
 <p class="booking-status" id="booking-status" role="status" aria-live="polite"></p>
 </form>
@@ -175,7 +175,7 @@ main{padding-top:0}
  service.addEventListener("change",loadSlots);
  form.addEventListener("submit",async e=>{
   e.preventDefault();if(!selectedSlot)return;submit.disabled=true;status.textContent="Invio richiesta…";
-  try{const payload={service_id:service.value,starts_at:selectedSlot.starts_at,customer_name:form.elements.customer_name.value.trim(),customer_email:form.elements.customer_email.value.trim(),notes:form.elements.notes.value.trim()};
+  try{const payload={service_id:service.value,starts_at:selectedSlot.starts_at,customer_name:form.elements.customer_name.value.trim(),customer_instagram:form.elements.customer_instagram.value.trim(),notes:form.elements.notes.value.trim()};
    const r=await fetch(api+"/public/appointments",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
    const data=await r.json();if(!r.ok)throw Error(data.error||"Prenotazione non riuscita");
    status.textContent="Richiesta inviata, in attesa di conferma.";form.reset();await loadSlots();
