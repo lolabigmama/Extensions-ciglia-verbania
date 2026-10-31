@@ -8,6 +8,7 @@
 - Trattamenti: Extensions ciglia one to one (50 €, 120 min), Extensions ciglia volume (70 €, 120 min), Refill one to one (40 €, 120 min), Refill volume (60 €, 120 min).
 - Orari settimanali: non ancora configurati. Sono supportate disponibilità eccezionali per singole date tramite `special_slots`.
 - Disponibilità inserite: lunedì 2 novembre 2026 alle 10:30, 14:00, 16:00 e 18:00 (Europe/Rome), ciascuna per un appuntamento di 2 ore.
+- Il modulo raccoglie nome e cognome, nickname Instagram e note aggiuntive facoltative; non richiede l'email e non invia messaggi automatici su Instagram.
 - Le richieste dal sito vengono salvate come `pending`, non come appuntamenti confermati.
 
 ## Endpoint pubblici usati dal sito
