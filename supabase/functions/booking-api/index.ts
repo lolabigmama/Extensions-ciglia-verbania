@@ -31,6 +31,25 @@ function owner(req: Request) {
 async function notifyCalendar() {
   try { await db.channel("calendar").send({ type: "broadcast", event: "calendar_changed", payload: { changed_at: new Date().toISOString() } }); } catch { /* best effort */ }
 }
+async function syncGoogleCalendar(payload: Record<string, unknown>) {
+  const scriptUrl = Deno.env.get("GOOGLE_APPS_SCRIPT_URL") ?? "";
+  const scriptToken = Deno.env.get("GOOGLE_APPS_SCRIPT_TOKEN") ?? "";
+  if (!scriptUrl || !scriptToken) return { ok: false, configured: false };
+  const response = await fetch(scriptUrl, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ ...payload, token: scriptToken }),
+    redirect: "follow",
+  });
+  const raw = await response.text();
+  let result: Record<string, unknown> = {};
+  try { result = JSON.parse(raw); } catch { /* Apps Script may return a plain response */ }
+  if (!response.ok || result.ok === false || result.error) {
+    throw new Error(String(result.error ?? result.message ?? `Google Calendar bridge error (${response.status})`));
+  }
+  return { ok: true, result };
+}
+
 async function availability(serviceId: string, date: string) {
   if (!validDate(date)) throw new Error("Data non valida.");
   const { data: service, error: se } = await db.from("services").select("id,name,price_cents,duration_minutes").eq("id", serviceId).eq("is_active", true).single();
@@ -99,11 +118,75 @@ Deno.serve(async (req: Request) => {
         starts_at:chosen.starts_at,ends_at:chosen.ends_at,status:"pending",source:"website"
       }).select("id,status,starts_at,ends_at").single();
       if (error) return json({error:error.code==="23P01"?"Questo orario è appena stato prenotato. Scegline un altro.":"Impossibile salvare la richiesta."},409,headers);
+      let calendarSync: { ok: boolean; configured?: boolean; error?: string } = { ok: false, configured: false };
+      try {
+        const customerNotes = String(body.notes ?? "").trim();
+        const description = [
+          "Richiesta dal sito Extensions Ciglia Verbania",
+          `Cliente: ${name}`,
+          `Instagram: @${instagram}`,
+          customerNotes ? `Note: ${customerNotes}` : "",
+          `ID prenotazione: ${inserted.id}`,
+        ].filter(Boolean).join("\\n");
+        const synced = await syncGoogleCalendar({
+          action: "upsert",
+          bookingId: inserted.id,
+          startsAt: chosen.starts_at,
+          endsAt: chosen.ends_at,
+          title: `IN ATTESA · ${name} · ${data.service.name}`,
+          description,
+        });
+        calendarSync = { ok: synced.ok, configured: true };
+      } catch (e) {
+        calendarSync = { ok: false, configured: true, error: e instanceof Error ? e.message : "Sincronizzazione Google Calendar non riuscita." };
+        console.error("Google Calendar create sync failed", e);
+      }
       await notifyCalendar();
-      return json({appointment:inserted,message:"Richiesta ricevuta, in attesa di conferma."},201,headers);
+      return json({appointment:inserted,message:"Richiesta ricevuta, in attesa di conferma.",calendar_sync:calendarSync},201,headers);
     }
     if (url.pathname.includes("/owner/") || path === "hours" || path === "blocks") {
       if (!owner(req)) return json({error:"Accesso titolare non configurato o non autorizzato."},401,headers);
+      if (req.method === "POST" && (path === "confirm" || path === "cancel")) {
+        const body = await req.json();
+        const id = String(body.id ?? "").trim();
+        if (!id) return json({ error: "ID prenotazione mancante." }, 400, headers);
+        const { data: appointment, error: ae } = await db.from("appointments")
+          .select("id,customer_name,customer_instagram,customer_notes,starts_at,ends_at,status,services(name)")
+          .eq("id", id).single();
+        if (ae || !appointment) return json({ error: "Prenotazione non trovata." }, 404, headers);
+        if (path === "confirm" && appointment.status === "cancelled") return json({ error: "Una richiesta annullata non può essere confermata." }, 409, headers);
+        const nextStatus = path === "confirm" ? "confirmed" : "cancelled";
+        if (appointment.status === nextStatus) return json({ appointment, message: "Stato già aggiornato." }, 200, headers);
+        const { data: updated, error: ue } = await db.from("appointments").update({ status: nextStatus, updated_at: new Date().toISOString() }).eq("id", id).select().single();
+        if (ue || !updated) throw ue ?? new Error("Impossibile aggiornare la prenotazione.");
+        try {
+          if (nextStatus === "cancelled") {
+            await syncGoogleCalendar({ action: "delete", bookingId: id });
+          } else {
+            const serviceName = Array.isArray(appointment.services) ? appointment.services[0]?.name : (appointment.services as {name?:string} | null)?.name;
+            const description = [
+              "Prenotazione Extensions Ciglia Verbania",
+              `Cliente: ${appointment.customer_name}`,
+              appointment.customer_instagram ? `Instagram: @${appointment.customer_instagram}` : "",
+              appointment.customer_notes ? `Note: ${appointment.customer_notes}` : "",
+              `ID prenotazione: ${id}`,
+            ].filter(Boolean).join("\\n");
+            await syncGoogleCalendar({
+              action: "upsert",
+              bookingId: id,
+              startsAt: appointment.starts_at,
+              endsAt: appointment.ends_at,
+              title: `CONFERMATO · ${appointment.customer_name}${serviceName ? " · " + serviceName : ""}`,
+              description,
+            });
+          }
+        } catch (e) {
+          await db.from("appointments").update({ status: appointment.status, updated_at: new Date().toISOString() }).eq("id", id);
+          throw new Error("Stato non modificato: sincronizzazione Google Calendar non riuscita. " + (e instanceof Error ? e.message : ""));
+        }
+        await notifyCalendar();
+        return json({ appointment: updated, message: nextStatus === "confirmed" ? "Prenotazione confermata." : "Prenotazione rifiutata ed evento eliminato." }, 200, headers);
+      }
       if (req.method === "GET" && path === "hours") {
         const {data,error}=await db.from("business_hours").select("*").order("weekday").order("opens_at"); if(error) throw error; return json({hours:data},200,headers);
       }
