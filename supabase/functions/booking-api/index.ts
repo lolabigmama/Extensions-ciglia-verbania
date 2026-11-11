@@ -85,16 +85,16 @@ Deno.serve(async (req: Request) => {
     if (req.method === "POST" && path === "appointments") {
       const body = await req.json();
       const name = String(body.customer_name ?? "").trim();
-      const email = String(body.customer_email ?? "").trim();
+      const instagram = String(body.customer_instagram ?? "").trim().replace(/^@/, "");
       const serviceId = String(body.service_id ?? "");
       const startsAt = new Date(String(body.starts_at ?? ""));
-      if (name.length < 2 || name.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || Number.isNaN(startsAt.getTime())) return json({error:"Inserisci nome, email e orario validi."},400,headers);
+      if (name.length < 2 || name.length > 120 || instagram.length < 1 || instagram.length > 40 || !/^[A-Za-z0-9._]+$/.test(instagram) || Number.isNaN(startsAt.getTime())) return json({error:"Inserisci nome, nickname Instagram e orario validi."},400,headers);
       const localDate = toZonedTime(startsAt,TZ).getFullYear()+"-"+String(toZonedTime(startsAt,TZ).getMonth()+1).padStart(2,"0")+"-"+String(toZonedTime(startsAt,TZ).getDate()).padStart(2,"0");
       const data = await availability(serviceId,localDate);
       const chosen = data.slots.find(x => x.starts_at === startsAt.toISOString());
       if (!chosen) return json({error:"Questo orario non è più disponibile. Aggiorna il calendario."},409,headers);
       const { data: inserted, error } = await db.from("appointments").insert({
-        service_id:serviceId,customer_name:name,customer_email:email,
+        service_id:serviceId,customer_name:name,customer_instagram:instagram,
         customer_notes:String(body.notes ?? "").slice(0,1000),
         starts_at:chosen.starts_at,ends_at:chosen.ends_at,status:"pending",source:"website"
       }).select("id,status,starts_at,ends_at").single();
@@ -136,7 +136,7 @@ Deno.serve(async (req: Request) => {
         const from=url.searchParams.get("from") ?? ""; const to=url.searchParams.get("to") ?? "";
         if(!validDate(from)||!validDate(to)) return json({error:"Intervallo date non valido."},400,headers);
         const a=dayRange(from), b=dayRange(to);
-        const {data,error}=await db.from("appointments").select("id,customer_name,customer_email,customer_phone,customer_notes,starts_at,ends_at,status,source,services(name,price_cents)").gte("starts_at",a.start.toISOString()).lt("starts_at",b.end.toISOString()).order("starts_at");
+        const {data,error}=await db.from("appointments").select("id,customer_name,customer_instagram,customer_phone,customer_notes,starts_at,ends_at,status,source,services(name,price_cents)").gte("starts_at",a.start.toISOString()).lt("starts_at",b.end.toISOString()).order("starts_at");
         if(error) throw error; return json({appointments:data},200,headers);
       }
       if (req.method === "POST" && path === "blocks") {
