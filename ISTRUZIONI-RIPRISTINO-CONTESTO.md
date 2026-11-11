@@ -327,3 +327,25 @@ Nota: alcuni file di documentazione più vecchi (in particolare `BOOKING-ARCHITE
 - [ ] Se richiesto dalla titolare, progettare e realizzare un pannello amministratore privato con autenticazione e autorizzazione server-side. Non esiste ancora una pagina admin sul sito.
 
 Fine del manuale. In caso di dubbio, non indovinare: controllare il codice live e lo schema Supabase, poi chiedere alla titolare il chiarimento minimo necessario.
+
+
+## 14. Allineamento codice e integrazione Google Calendar (11 novembre 2026)
+
+- Verificata la Edge Function Supabase `booking-api` attiva, versione 5.
+- Il file `supabase/functions/booking-api/index.ts` su GitHub era rimasto indietro rispetto alla versione distribuita. È stato riallineato copiando il sorgente effettivo della versione 5 attiva e verificando che il contenuto GitHub coincida byte per byte con quello distribuito.
+- La versione 5 usa `customer_instagram`, non usa `customer_email` e mantiene le richieste in stato `pending`.
+- Commit di riallineamento su `main`: `53722c27f72f9332a41bbf00543ff664d98173ea`.
+- Il progetto Supabase era in fase di ripristino e risultava ancora `COMING_UP` al controllo successivo. Non dichiarare il backend operativo finché lo stato non diventa `ACTIVE` e gli endpoint non vengono verificati.
+- Calendario Google dedicato individuato nell'account collegato: titolo `Prenotazioni extensions 🩷`, fuso `Europe/Rome`. Non leggere né usare il calendario primario/personale.
+- La sincronizzazione automatica Google Calendar NON è ancora implementata. Il collegamento Google Calendar di ChatGPT non fornisce credenziali server-side al sito.
+- Prima di implementare la sincronizzazione serve un flusso OAuth Google per autorizzare il backend del sito al solo scope Calendar necessario, ottenere e conservare in modo sicuro il refresh token e configurare i relativi secret Supabase. Non inserire token, client secret o refresh token in GitHub o nel frontend.
+- Comportamento concordato: ogni nuova richiesta crea un evento sul solo calendario dedicato con titolo/stato IN ATTESA; la conferma aggiorna lo stesso evento; il rifiuto lo annulla/elimina dal calendario. Le operazioni devono essere idempotenti e conservare l'ID Google dell'evento nella riga appuntamento per aggiornare sempre l'evento corretto.
+- La disponibilità pubblica deve continuare a dipendere dalle tabelle Supabase, non dalla lettura del calendario Google personale. Non importare eventi privati né usarli per bloccare gli slot.
+
+### Procedura per mantenere GitHub e Supabase allineati
+1. Prima di ogni modifica leggere questo manuale e i file live di GitHub.
+2. Prima di cambiare una Edge Function, recuperare anche la versione distribuita con gli strumenti Supabase e confrontarla con il file nel repository.
+3. Modificare il file in `main`, committare, quindi distribuire esattamente quel contenuto su Supabase.
+4. Dopo il deploy verificare versione attiva, endpoint e comportamento; se si modifica solo il sorgente già distribuito, verificare che il file GitHub corrisponda al codice live.
+5. Non modificare Supabase direttamente senza riportare la stessa modifica nel repository. GitHub è il sorgente versionato; Supabase è l'ambiente esecutivo.
+6. Dopo ogni push verificare GitHub Actions e il sito pubblicato. Non dichiarare una modifica online prima della verifica.
