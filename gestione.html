@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestione prenotazioni | Extensions Ciglia Verbania</title>
+<style>
+:root{color-scheme:light;--wine:#80545e;--rose:#eadbd6;--paper:#fbf6f2;--ink:#49373b}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:900px;margin:0 auto;padding:28px 18px 60px}h1{font:italic 34px Georgia,serif;font-weight:400;margin:0 0 8px}
+.sub{color:#8a7277;font-size:13px;margin:0 0 24px}.panel,.booking{background:#fffdfa;border:1px solid var(--rose);padding:18px;margin:14px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.field{display:grid;gap:6px;flex:1;min-width:190px}label{font-size:12px;color:#80636b}
+input{padding:12px;border:1px solid var(--rose);background:white;color:var(--ink);font:inherit;width:100%}
+button{border:0;background:var(--wine);color:white;padding:12px 16px;font:inherit;cursor:pointer}button.secondary{background:#eadbd6;color:#704a53}button:disabled{opacity:.45;cursor:wait}
+#status{font-size:13px;color:var(--wine);min-height:20px;margin-top:12px}
+.booking{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.booking h2{font:italic 21px Georgia,serif;font-weight:400;margin:0 0 5px}.meta{font-size:13px;color:#826f73;line-height:1.6}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{padding:10px 12px;font-size:13px}
+.tag{display:inline-block;font-size:10px;letter-spacing:.08em;padding:4px 7px;background:#f2e7e3;color:#80545e;margin-bottom:7px}
+@media(max-width:620px){.booking{grid-template-columns:1fr}.actions button{flex:1}}
+</style>
+</head>
+<body><main>
+<h1>Le tue prenotazioni</h1>
+<p class="sub">Pannello riservato alla titolare · Extensions Ciglia Verbania</p>
+<section class="panel">
+<div class="row">
+<div class="field"><label for="key">Chiave titolare (OWNER_ACTION_API_KEY)</label><input id="key" type="password" autocomplete="off" placeholder="Inserisci la chiave titolare"></div>
+<div class="field"><label for="from">Dal giorno</label><input id="from" type="date"></div>
+<div class="field"><label for="to">Al giorno</label><input id="to" type="date"></div>
+<button id="load">Carica prenotazioni</button>
+</div><div id="status" role="status"></div>
+</section>
+<section id="list" aria-live="polite"></section>
+</main>
+<script>
+(()=>{
+const API="https://lcfdshnpsgaaqmyupzcy.supabase.co/functions/v1/booking-api";
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const today=new Date(), first=new Date(today.getFullYear(),today.getMonth(),1), last=new Date(today.getFullYear(),today.getMonth()+1,0);
+$("from").value=first.getFullYear()+"-"+pad(first.getMonth()+1)+"-"+pad(first.getDate());
+$("to").value=last.getFullYear()+"-"+pad(last.getMonth()+1)+"-"+pad(last.getDate());
+let key="";
+const fmt=v=>new Intl.DateTimeFormat("it-IT",{weekday:"short",day:"2-digit",month:"long",hour:"2-digit",minute:"2-digit",timeZone:"Europe/Rome"}).format(new Date(v));
+async function request(path,options={}){
+ const response=await fetch(API+path,{...options,headers:{"content-type":"application/json","x-owner-api-key":key,...(options.headers||{})}});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(data.error||"Errore di collegamento ("+response.status+")");
+ return data;
+}
+function card(a){
+ const service=Array.isArray(a.services)?a.services[0]:a.services;
+ const el=document.createElement("article");el.className="booking";
+ const info=document.createElement("div");
+ const tag=document.createElement("span");tag.className="tag";tag.textContent=a.status==="pending"?"IN ATTESA":a.status==="confirmed"?"CONFERMATO":"ANNULLATO";
+ const h=document.createElement("h2");h.textContent=a.customer_name||"Cliente";
+ const meta=document.createElement("div");meta.className="meta";
+ meta.textContent=fmt(a.starts_at)+" · "+(service?.name||"Trattamento")+" · @"+(a.customer_instagram||"");
+ info.append(tag,h,meta);
+ if(a.customer_notes){const note=document.createElement("div");note.className="meta";note.textContent="Note: "+a.customer_notes;info.append(note);}
+ el.append(info);
+ if(a.status!=="cancelled"){
+  const actions=document.createElement("div");actions.className="actions";
+  if(a.status==="pending"){
+   const yes=document.createElement("button");yes.textContent="Conferma";
+   yes.addEventListener("click",()=>change("confirm",a.id,yes));
+   const no=document.createElement("button");no.className="secondary";no.textContent="Rifiuta";
+   no.addEventListener("click",()=>change("cancel",a.id,no));
+   actions.append(yes,no);
+  }else{
+   const no=document.createElement("button");no.className="secondary";no.textContent="Annulla";
+   no.addEventListener("click",()=>change("cancel",a.id,no));actions.append(no);
+  }
+  el.append(actions);
+ }
+ return el;
+}
+async function load(){
+ key=$("key").value.trim();if(!key){$("status").textContent="Inserisci la chiave titolare.";return;}
+ $("load").disabled=true;$("status").textContent="Caricamento…";$("list").replaceChildren();
+ try{
+  const q=new URLSearchParams({from:$("from").value,to:$("to").value});
+  const data=await request("/owner/appointments?"+q);
+  const rows=data.appointments||[];
+  if(!rows.length){$("status").textContent="Nessuna prenotazione in questo intervallo.";return;}
+  rows.forEach(a=>$("list").append(card(a)));
+  $("status").textContent=rows.length+" prenotazioni caricate.";
+ }catch(e){$("status").textContent=e.message;}
+ finally{$("load").disabled=false;}
+}
+async function change(action,id,button){
+ if(!confirm(action==="confirm"?"Confermare questa prenotazione?":"Rifiutare e cancellare l'evento dal calendario?"))return;
+ button.disabled=true;$("status").textContent="Aggiornamento…";
+ try{await request("/owner/"+action,{method:"POST",body:JSON.stringify({id})});$("status").textContent=action==="confirm"?"Prenotazione confermata.":"Prenotazione rifiutata.";await load();}
+ catch(e){$("status").textContent=e.message;button.disabled=false;}
+}
+$("load").addEventListener("click",load);
+})();
+</script>
+</body></html>
