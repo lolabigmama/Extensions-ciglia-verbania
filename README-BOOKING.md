@@ -106,3 +106,9 @@ I giorni sono numerati 0=domenica, 1=lunedì, ..., 6=sabato. Per orari di una si
 - Edge Function `booking-api`: aggiornata per salvare il nickname Instagram, restituire la conferma di ricezione in attesa di approvazione e usare il campo Instagram nelle letture riservate alla titolare.
 - Confermato per requisito: nessun DM Instagram automatico.
 - Documentazione aggiornata per chiarire dove consultare le richieste e che il pannello amministratore integrato non è ancora presente.
+
+
+## Allineamento sorgente e backend
+Il sorgente della Edge Function deve restare versionato in `supabase/functions/booking-api/index.ts`. Prima di modificare o distribuire la funzione, confrontare il file GitHub con la versione effettivamente attiva su Supabase. Dopo ogni deploy, verificare la versione e riportare nel repository lo stesso sorgente. Non modificare Supabase direttamente lasciando indietro GitHub.
+
+Al controllo dell'11 novembre 2026, il file GitHub della funzione è stato riallineato alla versione 5 attiva su Supabase (commit `53722c27f72f9332a41bbf00543ff664d98173ea`). La sincronizzazione automatica Google Calendar non è ancora implementata. Il calendario dedicato individuato è `Prenotazioni extensions 🩷` con fuso `Europe/Rome`; nessuna lettura del calendario personale è prevista.
