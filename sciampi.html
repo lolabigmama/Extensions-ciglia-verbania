@@ -2,21 +2,63 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f4ef">
-<title>Shampoo | Extensions Ciglia Verbania</title>
+<meta name="description" content="Whipped Shampoo: detergente specifico per la pulizia e la cura quotidiana delle extension ciglia.">
+<title>Whipped Shampoo | Extensions Ciglia Verbania</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Italiana&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+:root{--paper:#f7f4ef;--cream:#fffefa;--ink:#292522;--muted:#82776e;--accent:#8c6b58;--line:#ded5ca;--wine:#302a25;--serif:"Italiana",Georgia,serif;--sans:"Manrope","DM Sans",sans-serif}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:#f7f4ef;color:#292522;font-family:Georgia,serif;display:grid;place-items:center}
-main{width:min(620px,90vw);min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 0}
-img{display:block;width:100%;max-height:75svh;object-fit:contain}
-.price{margin-top:18px;font-size:30px;font-style:italic;color:#8c6b58}
+html{min-height:100%;background:var(--paper)}
+body{margin:0;min-height:100vh;background:var(--paper);color:var(--ink);font:14px/1.7 var(--sans)}
+a{color:inherit}
+.wrap{width:min(1240px,88vw);margin-inline:auto}
+.top{position:sticky;top:0;z-index:20;background:#f7f4efef;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top-inner{min-height:68px;display:flex;align-items:center}
+.brand{text-decoration:none;display:flex;align-items:center;gap:11px}
+.brand-mark{width:34px;height:34px;border:1px solid var(--accent);border-radius:50%;display:grid;place-items:center;font:italic 23px var(--serif);color:var(--accent)}
+.brand-name{font:italic 15px/1 var(--serif)}
+.brand-name small{display:block;font:700 8px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+main{min-height:calc(100svh - 68px);padding:clamp(28px,6vw,76px) 0}
+.product-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:clamp(24px,6vw,82px);align-items:center}
+.product-visual{min-height:clamp(380px,57vw,650px);position:relative;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 45%,#fffefa 0%,#eee5dc 65%,#e7dcd1 100%);border:1px solid #e3d9cf}
+.product-visual:before{content:"";position:absolute;width:70%;aspect-ratio:1;border:1px solid #fff;outline:1px solid #fff8;outline-offset:25px;border-radius:50%}
+.product-visual img{position:relative;z-index:1;display:block;width:84%;height:clamp(340px,48vw,560px);object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(15px 24px 22px #765b4b28)}
+.product-info{padding:clamp(8px,2vw,24px) 0}
+.eyebrow{font-size:9px;letter-spacing:.24em;text-transform:uppercase;font-weight:700;color:var(--accent)}
+h1{font:400 clamp(44px,6vw,76px)/.98 var(--serif);letter-spacing:-.035em;margin:16px 0 12px}
+.price{font:italic 34px var(--serif);color:var(--accent);margin:0 0 28px}
+.description{max-width:440px;color:var(--muted);font-size:14px;line-height:1.9}
+.benefit{max-width:440px;margin-top:25px;padding:19px 0 0;border-top:1px solid var(--line);color:#65584e;font-size:12px;line-height:1.85}
+.benefit strong{display:block;margin-bottom:5px;color:var(--ink);font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+.back-link{display:inline-flex;align-items:center;gap:12px;margin-top:30px;padding:14px 21px;background:var(--wine);color:#fff;text-decoration:none;border-radius:99px;font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;transition:background .2s,transform .2s}
+.back-link:hover{background:var(--accent);transform:translateY(-2px)}
+footer{border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font-size:9px;letter-spacing:.08em}
+.footer-inner{display:flex;justify-content:space-between;gap:15px;align-items:center}
+footer a{text-decoration:none}
+@media(max-width:760px){main{padding:24px 0 42px}.product-layout{grid-template-columns:1fr;gap:25px}.product-visual{min-height:390px}.product-visual img{height:350px;width:86%}.product-info{padding:0 2px}.price{margin-bottom:18px}h1{font-size:54px}.footer-inner{flex-direction:column;align-items:flex-start;gap:7px}}
 </style>
 </head>
 <body>
+<header class="top"><div class="wrap top-inner">
+<a class="brand" href="index.html#calendario" aria-label="Extensions Ciglia Verbania"><span class="brand-mark">L</span><span class="brand-name">Extensions Ciglia<small>Verbania</small></span></a>
+</div></header>
 <main>
-<img src="assets/products/IMG_9903.jpeg" alt="Whipped Shampoo">
+<div class="wrap product-layout">
+<div class="product-visual"><img src="assets/products/IMG_9903.jpeg" alt="Whipped Shampoo Lash Bath by Lola"></div>
+<section class="product-info" aria-labelledby="product-title">
+<div class="eyebrow">Cura delle extension</div>
+<h1 id="product-title">Whipped Shampoo</h1>
 <div class="price">20 €</div>
+<p class="description">Uno shampoo specifico per detergere delicatamente le ciglia naturali e le extension, rimuovendo sebo, trucco e impurità che possono accumularsi alla base delle ciglia.</p>
+<div class="benefit"><strong>Perché usarlo</strong>Una pulizia regolare aiuta a mantenere la zona delle ciglia fresca e pulita, favorisce una buona igiene e contribuisce a preservare nel tempo la bellezza delle extension.</div>
+<a class="back-link" href="index.html#calendario">Torna al calendario <span aria-hidden="true">↗</span></a>
+</section>
+</div>
 </main>
+<footer><div class="wrap footer-inner"><span>© Extensions Ciglia Verbania</span><a href="index.html">Torna al sito principale</a></div></footer>
 </body>
 </html>
