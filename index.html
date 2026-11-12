@@ -102,11 +102,50 @@ main{padding-top:0}
 .rules-confirm:disabled{opacity:.4;cursor:not-allowed}
 @media(max-width:560px){.rules-dialog{max-height:92svh}.rules-list{max-height:43svh}.rules-actions{flex-direction:column-reverse}.rule-item{padding:11px 0}}
 
+
+/* Restyling premium: palette ivory, espresso e champagne */
+:root{--paper:#f7f4ef;--cream:#fffefa;--pink:#e9d8d1;--rose:#b99a83;--rose-deep:#8c6b58;--wine:#292522;--ink:#292522;--muted:#82776e;--line:#ded5ca;--serif:"Italiana",Georgia,serif;--sans:"Manrope","DM Sans",sans-serif}
+body{background:#f7f4ef;color:#292522}
+.top{background:#f7f4efeF;border-color:#ded5ca}
+.brand-mark{border-color:#9b7d69;color:#8c6b58}
+.brand-name small{color:#897c71}
+.nav{display:flex!important;gap:clamp(14px,3vw,34px);align-items:center}
+.nav a{color:#39312b;font-size:9px;letter-spacing:.18em}
+.nav a:hover{color:#9b765e}
+.nav a[href="sciampi.html"]{padding:10px 17px;border:1px solid #a88a74;border-radius:99px}
+.live-calendar{background:linear-gradient(135deg,#f7f4ef 0%,#f1e9e1 100%);padding-top:clamp(24px,4vw,48px)}
+.calendar-panel,.booking-panel{background:#fffefa;border:1px solid #e2d9ce;box-shadow:0 24px 65px #392c2410}
+.calendar-title h1,.booking-panel h2{color:#292522}
+.month-switch button,.day-cell,.time-chip{background:#fffefa;border-color:#ded5ca;color:#59483d}
+.month-switch button:hover,.day-cell:not(:disabled):hover,.time-chip:hover{border-color:#9b765e}
+.day-cell.selected,.time-chip.selected{background:#302a25;border-color:#302a25;color:#fff}
+.day-cell.today{box-shadow:inset 0 0 0 1px #b3947b}
+.calendar-help{color:#88776b}
+.field label{color:#80634f}
+.field input,.field select,.field textarea{border-color:#ded5ca;background:#fffefa;color:#302a25}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#a98a70;box-shadow:0 0 0 3px #a98a701a}
+.booking-submit{background:#302a25;color:#fff;letter-spacing:.16em}
+.booking-submit:hover:not(:disabled){background:#80634f}
+.booking-status{color:#80634f}
+.products{background:#eee6dd;padding-top:clamp(38px,6vw,72px)}
+.products h2{font-size:clamp(32px,4vw,46px);color:#302a25}
+.products .shop-card{background:#fffefa;border:1px solid #e3d9cf}
+.products .shop-visual{background:radial-gradient(circle at 50% 45%,#fffefa 0%,#eee5dc 100%)}
+.products .price{color:#8c6b58}
+.rules-dialog{background:#fffefa;border-color:#ded5ca;color:#302a25}
+.rules-dialog::backdrop{background:#211c18aa}
+.rules-kicker,.rule-item h3,.rules-thanks{color:#8c6b58}
+.rules-accept{background:#f1ebe3}
+.rules-confirm{background:#302a25;border-color:#302a25}
+.rules-cancel{color:#6f5a4a;border-color:#bca995}
+@media(max-width:560px){.nav{display:flex!important;gap:10px}.nav a{font-size:8px;letter-spacing:.1em}.nav a[href="sciampi.html"]{padding:8px 10px}.brand-name{font-size:14px}.top-inner{gap:8px}}
+
 </style>
 </head>
 <body>
 <header class="top" id="topbar"><div class="wrap top-inner">
 <a class="brand" href="#calendario" aria-label="Extensions Ciglia Verbania"><span class="brand-mark">L</span><span class="brand-name">Extensions Ciglia<small>Verbania</small></span></a>
+<nav class="nav" aria-label="Navigazione principale"><a href="#calendario">Prenota</a><a href="sciampi.html">Lash care</a></nav>
 </div></header>
 <main>
 <section class="live-calendar" id="calendario">
