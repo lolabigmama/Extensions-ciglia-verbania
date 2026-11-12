@@ -19,96 +19,49 @@ Tutti i trattamenti hanno durata di 120 minuti.
 - Refill volume: 60 €.
 
 ## Modulo di prenotazione sul sito
-Il modulo raccoglie:
-- Nome e cognome (obbligatorio).
-- Nickname Instagram (obbligatorio nel modulo; viene salvato in `customer_instagram`; è accettato con o senza `@` iniziale).
-- Trattamento, data e orario.
-- Note aggiuntive facoltative.
-
-L'indirizzo email è stato rimosso dal modulo e non viene richiesto né inviato all'API. Non è configurato alcun messaggio automatico o DM Instagram di conferma. Dopo l'invio, il sito comunica che la richiesta è stata ricevuta ed è in attesa di conferma.
-
-Le richieste vengono registrate con stato `pending`. Una richiesta in attesa non equivale a un appuntamento confermato: la titolare deve verificarla e confermarla tramite il flusso amministrativo disponibile.
+Il modulo raccoglie nome, nickname Instagram, trattamento, data/orario e note facoltative. L'email non viene richiesta. Le richieste sono registrate come `pending` e attendono conferma della titolare. Non viene inviato alcun DM Instagram automatico.
 
 ## Dove consultare le prenotazioni
-Al momento **non è stata realizzata una pagina/pannello amministratore integrato nel sito pubblico**.
-
-Per consultare le richieste:
-1. Aprire https://supabase.com/dashboard/project/lcfdshnpsgaaqmyupzcy/editor
-2. Accedere al progetto Supabase.
-3. Aprire **Table Editor**.
-4. Selezionare la tabella `public.appointments`.
-
-Campi rilevanti della tabella includono nome cliente, nickname Instagram (`customer_instagram`), trattamento, data/orario, note (`customer_notes`) e stato (`status`, ad esempio `pending` o `confirmed`). I nomi esatti delle altre colonne dipendono dallo schema attivo.
-
-**Nota operativa:** non condividere pubblicamente il link al dashboard o credenziali di accesso. La tabella contiene dati personali delle clienti.
+Le richieste sono archiviate in `public.appointments` nel progetto Supabase:
+https://supabase.com/dashboard/project/lcfdshnpsgaaqmyupzcy/editor
 
 ## Disponibilità e calendario
-- La tabella `business_hours` è attualmente vuota: non sono ancora configurati orari settimanali ricorrenti.
-- Le disponibilità eccezionali per singole date sono gestite tramite `special_slots`.
-- Gli slot speciali prevalgono sugli orari settimanali generati.
-- Le disponibilità vengono ricalcolate lato database; richieste che entrano in conflitto con appuntamenti già occupati vengono rifiutate.
-- Gli appuntamenti con stato `pending` o `confirmed` occupano la disponibilità.
-- Le date bloccate sono gestite tramite `blocked_dates`; le impostazioni generali tramite `booking_settings`.
-- Disponibilità speciali già annotate: lunedì 2 novembre 2026 alle 10:30, 14:00, 16:00 e 18:00 (Europe/Rome), ciascuna per un appuntamento di 2 ore. Verificare che siano ancora presenti nel database prima di considerarle prenotabili.
+- `business_hours` contiene gli orari settimanali ricorrenti.
+- `special_slots` contiene le disponibilità per date specifiche e prevale sugli orari ricorrenti.
+- Gli appuntamenti `pending` e `confirmed` occupano la disponibilità.
+- Le date bloccate sono gestite tramite `blocked_dates`.
+- Le impostazioni sono in `booking_settings`.
 
-## Endpoint pubblici usati dal sito
-- `GET /public/services`
-- `GET /public/availability?service_id=...&date=YYYY-MM-DD`
-- `POST /public/appointments`
+## API e azioni titolare
+Gli endpoint pubblici per servizi, disponibilità e creazione appuntamenti sono gestiti dalla Edge Function `booking-api`. Le azioni private richiedono `x-owner-api-key`, corrispondente al secret `OWNER_ACTION_API_KEY`. Non esporre mai chiavi private o la service-role key nel frontend, nel repository o nei messaggi.
 
-Il payload di creazione appuntamento include `customer_instagram` e le note facoltative; non include `customer_email`.
+## Sincronizzazione Google Calendar
 
-## Azioni private per la titolare / GPT
-OpenAPI: `openapi/gpt-actions.yaml`
-- `GET /owner/hours`
-- `POST /owner/hours`
-- `DELETE /owner/hours?id=...`
-- `GET /owner/appointments?from=YYYY-MM-DD&to=YYYY-MM-DD`
-- `POST /owner/blocks`
-- `GET /owner/special-slots?from=YYYY-MM-DD&to=YYYY-MM-DD`
-- `POST /owner/special-slots` con `slot_date` e `starts_at`
-- `DELETE /owner/special-slots?id=...`
+Il calendario dedicato è **Prenotazioni extensions 🩷**, ID:
+`9423ee2eb38a3e279cecd6aa89960d4c2556b192de63a3505dd8b1788e0e0099@group.calendar.google.com`
+Timezone: `Europe/Rome`.
 
-Le azioni private richiedono l'header `x-owner-api-key`. La chiave corrisponde al secret Supabase `OWNER_ACTION_API_KEY`. Non inserire mai questa chiave o la service-role key nel frontend, nel repository o nei messaggi.
+La Edge Function `booking-api` chiama un Google Apps Script tramite i secret server-side:
+- `GOOGLE_APPS_SCRIPT_URL`: URL della Web App Apps Script distribuita.
+- `GOOGLE_APPS_SCRIPT_TOKEN`: token condiviso, conservato solo nei secret Supabase e nelle Script Properties di Apps Script.
 
-## Configurazione server-side Supabase
-La Edge Function utilizza le variabili server-side `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` fornite dall'ambiente Supabase. Configurare inoltre:
-- `OWNER_ACTION_API_KEY`: chiave casuale lunga e privata per le azioni della titolare.
-- `SITE_ORIGIN`: `https://lolabigmama.github.io`.
+Il bridge è versionato in `google-apps-script/Code.gs`. Per attivarlo:
+1. Aprire https://script.google.com/ con l'account Google proprietario del calendario.
+2. Creare un progetto Apps Script e incollare il contenuto di `google-apps-script/Code.gs`.
+3. In **Impostazioni progetto → Proprietà script**, aggiungere:
+   - `GOOGLE_CALENDAR_ID` = l'ID del calendario dedicato riportato sopra.
+   - `GOOGLE_BRIDGE_TOKEN` = un token casuale lungo (almeno 32 byte). Non riutilizzare password.
+4. In **Distribuisci → Nuova distribuzione → App web**, eseguire l'app come **Me** e consentire l'accesso a **Chiunque**. Autorizzare l'accesso a Google Calendar quando richiesto. Copiare l'URL della Web App che termina in `/exec`.
+5. Nel dashboard Supabase del progetto, aprire **Edge Functions → Secrets** e impostare:
+   - `GOOGLE_APPS_SCRIPT_URL` = URL `/exec` appena copiato.
+   - `GOOGLE_APPS_SCRIPT_TOKEN` = lo stesso token impostato in Script Properties.
+6. Dopo aver salvato i secret, inviare una nuova prenotazione di prova dal sito. Deve apparire nel calendario dedicato con titolo `IN ATTESA`. Quando la titolare la conferma, lo stesso evento viene aggiornato a `CONFERMATO`; se la annulla, l'evento viene eliminato.
 
-Non pubblicare mai valori reali dei segreti.
+Il bridge effettua upsert usando l'ID prenotazione, quindi conferme e aggiornamenti modificano l'evento esistente invece di crearne uno duplicato. Le richieste pending sono visibili in calendario ma non equivalgono a prenotazioni confermate.
 
-## Schema e gestione dati
-- Tabella `public.appointments`: contiene le richieste di appuntamento.
-- Colonna `customer_instagram`: aggiunta per memorizzare il nickname Instagram (tipo testo, nullable a livello database).
-- `customer_notes`: contiene le note aggiuntive facoltative.
-- `business_hours`: orari ricorrenti.
-- `special_slots`: disponibilità per date specifiche.
-- `blocked_dates`: date non prenotabili.
-- `booking_settings`: impostazioni di prenotazione.
+**Importante:** la parte server-side della Edge Function contiene già la chiamata al bridge, ma la sincronizzazione resta inattiva finché i due secret non sono configurati. Non inserire mai il token in GitHub o nel codice del sito. Se si cambia il codice Apps Script dopo la prima distribuzione, creare una nuova versione della distribuzione Web App.
 
-I nomi e i tipi effettivi devono essere verificati sullo schema Supabase prima di eseguire modifiche manuali.
-
-## Aggiornamento degli orari
-I giorni sono numerati 0=domenica, 1=lunedì, ..., 6=sabato. Per orari di una singola data usare `special_slots`; per orari ricorrenti usare `business_hours`. Il sito ricarica gli slot e riceve gli eventi realtime del calendario.
-
-## Sicurezza, privacy e stato del progetto
-- Le tabelle hanno RLS attivo.
-- I dati personali degli appuntamenti non devono essere esposti direttamente al browser: le letture e scritture passano dalla Edge Function.
-- Le richieste pubbliche restano in attesa di conferma (`pending`) finché la titolare non le conferma.
-- Non è attivo alcun invio automatico di DM o messaggi Instagram.
-- Non esiste ancora un pannello amministratore dedicato nel sito; la consultazione operativa avviene da Supabase Table Editor.
-- Prima di attivare prenotazioni automatiche o un pannello pubblico/privato, completare informativa privacy e consenso, protezione anti-abuso/rate limiting, test end-to-end e autenticazione/autorizzazione adeguata.
-
-## Cronologia aggiornamenti
-- Modulo aggiornato: rimosso il campo email; aggiunti nickname Instagram e note aggiuntive facoltative.
-- Database aggiornato: aggiunta la colonna `customer_instagram` a `public.appointments`.
-- Edge Function `booking-api`: aggiornata per salvare il nickname Instagram, restituire la conferma di ricezione in attesa di approvazione e usare il campo Instagram nelle letture riservate alla titolare.
-- Confermato per requisito: nessun DM Instagram automatico.
-- Documentazione aggiornata per chiarire dove consultare le richieste e che il pannello amministratore integrato non è ancora presente.
-
-
-## Allineamento sorgente e backend
-Il sorgente della Edge Function deve restare versionato in `supabase/functions/booking-api/index.ts`. Prima di modificare o distribuire la funzione, confrontare il file GitHub con la versione effettivamente attiva su Supabase. Dopo ogni deploy, verificare la versione e riportare nel repository lo stesso sorgente. Non modificare Supabase direttamente lasciando indietro GitHub.
-
-Al controllo dell'11 novembre 2026, il file GitHub della funzione è stato riallineato alla versione 5 attiva su Supabase (commit `53722c27f72f9332a41bbf00543ff664d98173ea`). La sincronizzazione automatica Google Calendar non è ancora implementata. Il calendario dedicato individuato è `Prenotazioni extensions 🩷` con fuso `Europe/Rome`; nessuna lettura del calendario personale è prevista.
+## Cronologia e manutenzione
+- Le richieste pubbliche restano `pending` fino alla conferma della titolare.
+- Nessun DM Instagram automatico.
+- Il sorgente della Edge Function deve restare versionato in `supabase/functions/booking-api/index.ts`. Prima di ogni deploy, confrontarlo con la versione attiva su Supabase e riallineare il repository dopo il deploy.
