@@ -265,7 +265,7 @@ body{background:#f7f4ef;color:#292522}
   try{const payload={service_id:service.value,starts_at:selectedSlot.starts_at,customer_name:form.elements.customer_name.value.trim(),customer_instagram:form.elements.customer_instagram.value.trim(),notes:form.elements.notes.value.trim()};
    const r=await fetch(api+"/public/appointments",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
    const data=await r.json();if(!r.ok)throw Error(data.error||"Prenotazione non riuscita");
-   status.textContent="Richiesta inviata, in attesa di conferma.";form.reset();await loadSlots();
+   status.textContent="Il tuo appuntamento è stato confermato. Ti aspetto in Via Repubblica 7/8 🏡\nScrivimi sulla pagina @extensionscigliaverbania quando ci sei 🩷";form.reset();await loadSlots();
   }catch(err){status.textContent=err.message;submit.disabled=!selectedSlot;}
  });
  renderMonth();loadServices();
