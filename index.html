@@ -136,6 +136,18 @@ body{background:#f7f4ef;color:#292522}
 .rules-cancel{color:#6f5a4a;border-color:#bca995}
 @media(max-width:560px){.nav{display:flex!important;gap:10px}.nav a{font-size:8px;letter-spacing:.1em}.nav a[href="sciampi.html"]{padding:8px 10px}.brand-name{font-size:14px}.top-inner{gap:8px}}
 
+
+/* Banner di conferma prenotazione, coordinato al banner delle regole */
+.confirmation-dialog{width:min(560px,calc(100% - 28px));max-height:88svh;padding:0;border:1px solid #ded5ca;background:#fffefa;color:#302a25;box-shadow:0 28px 90px #38252b55;text-align:center}
+.confirmation-dialog::backdrop{background:#211c18aa;backdrop-filter:blur(5px)}
+.confirmation-inner{padding:clamp(28px,5vw,48px)}
+.confirmation-kicker{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:#8c6b58;font-weight:700}
+.confirmation-heading{font:italic clamp(34px,6vw,48px)/1.05 var(--serif);font-weight:400;margin:13px 0 18px;color:#302a25}
+.confirmation-message{font-size:14px;line-height:1.9;color:#6f5d60;margin:0 auto 25px;white-space:pre-line}
+.confirmation-heart{font-size:25px;margin-bottom:18px}
+.confirmation-close{width:100%;min-height:48px;padding:12px 18px;border:1px solid #302a25;background:#302a25;color:#fff;font:700 9px var(--sans);letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.confirmation-close:hover{background:#80634f}
+
 </style>
 </head>
 <body>
@@ -197,6 +209,17 @@ body{background:#f7f4ef;color:#292522}
  </div>
 </dialog>
 
+<dialog class="confirmation-dialog" id="confirmation-dialog" aria-labelledby="confirmation-title">
+ <div class="confirmation-inner">
+  <div class="confirmation-heart" aria-hidden="true">♡</div>
+  <div class="confirmation-kicker">Extensions Ciglia Verbania</div>
+  <h2 class="confirmation-heading" id="confirmation-title">Grazie per la prenotazione!</h2>
+  <p class="confirmation-message">Il tuo appuntamento è stato confermato. Ti aspetto in Via Repubblica 7/8 a Trobaso🏡
+Scrivimi sulla pagina @extensionscigliaverbania quando ci sei 🩷</p>
+  <button class="confirmation-close" id="confirmation-close" type="button">Ho capito</button>
+ </div>
+</dialog>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
@@ -208,6 +231,9 @@ body{background:#f7f4ef;color:#292522}
  const service=$("service"), grid=$("days-grid"), monthLabel=$("month-label"), help=$("calendar-help");
  const times=$("time-list"), submit=$("booking-submit"), status=$("booking-status"), form=$("booking-form");
  const rulesDialog=$("rules-dialog"), rulesCheckbox=$("rules-checkbox"), rulesConfirm=$("rules-confirm"), rulesCancel=$("rules-cancel");
+ const confirmationDialog=$("confirmation-dialog");
+ $("confirmation-close").addEventListener("click",()=>confirmationDialog.close());
+ confirmationDialog.addEventListener("click",e=>{if(e.target===confirmationDialog)confirmationDialog.close();});
  let rulesAccepted=false;
  const today=new Date(); today.setHours(0,0,0,0);
  let month=new Date(today.getFullYear(),today.getMonth(),1), selectedDate=null, selectedSlot=null, services=[];
@@ -266,7 +292,7 @@ body{background:#f7f4ef;color:#292522}
   try{const payload={service_id:service.value,starts_at:selectedSlot.starts_at,customer_name:form.elements.customer_name.value.trim(),customer_instagram:form.elements.customer_instagram.value.trim(),notes:form.elements.notes.value.trim()};
    const r=await fetch(api+"/public/appointments",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
    const data=await r.json();if(!r.ok)throw Error(data.error||"Prenotazione non riuscita");
-   status.textContent="Il tuo appuntamento è stato confermato. Ti aspetto in Via Repubblica 7/8 a Trobaso🏡\nScrivimi sulla pagina @extensionscigliaverbania quando ci sei 🩷";form.reset();await loadSlots();
+   status.textContent="";form.reset();await loadSlots();confirmationDialog.showModal();
   }catch(err){status.textContent=err.message;submit.disabled=!selectedSlot;}
  });
  renderMonth();loadServices();
