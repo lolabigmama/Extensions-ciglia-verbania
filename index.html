@@ -256,7 +256,6 @@ body{background:#f7f4ef;color:#292522}
    data.slots.forEach(slot=>{const b=document.createElement("button");b.type="button";b.className="time-chip";b.textContent=new Intl.DateTimeFormat("it-IT",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Rome"}).format(new Date(slot.starts_at));b.addEventListener("click",()=>{selectedSlot=slot;b.classList.add("selected");[...times.children].filter(x=>x!==b).forEach(x=>x.classList.remove("selected"));submit.disabled=false;});times.append(b);});
   }catch(e){times.innerHTML='<span class="calendar-help">Errore di connessione.</span>';status.textContent=e.message;}
  }
- service.addEventListener("change",loadSlots);
  rulesCheckbox.addEventListener("change",()=>{rulesConfirm.disabled=!rulesCheckbox.checked;});
  rulesCancel.addEventListener("click",()=>{rulesDialog.close();rulesCheckbox.checked=false;});
  rulesConfirm.addEventListener("click",()=>{if(!rulesCheckbox.checked)return;rulesAccepted=true;rulesDialog.close();form.requestSubmit();});
