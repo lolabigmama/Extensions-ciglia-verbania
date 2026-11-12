@@ -80,6 +80,28 @@ main{padding-top:0}
 .footer,.social{display:none!important}
 @media(max-width:760px){.live-calendar{min-height:auto;padding:14px 0 25px}.live-layout{grid-template-columns:1fr;gap:12px}.calendar-panel,.booking-panel{padding:17px}.calendar-title h1{font-size:30px}.time-list{grid-template-columns:repeat(3,minmax(0,1fr))}.products{padding:20px 0 35px}.products .shop-grid{grid-template-columns:1fr 1fr;gap:9px}.products .shop-visual{height:170px}.products .shop-info{padding:11px}.products .shop-info h3{font-size:15px}.products .price{font-size:16px}}
 @media(max-width:380px){.products .shop-grid{grid-template-columns:1fr}.products .shop-visual{height:220px}.month-label{min-width:96px;font-size:10px}}
+
+/* Regole obbligatorie prima dell'invio della richiesta */
+.rules-dialog{width:min(680px,calc(100% - 28px));max-height:min(88svh,820px);padding:0;border:1px solid #e5d1cd;background:#fffaf6;color:#3e3033;box-shadow:0 28px 90px #38252b55}
+.rules-dialog::backdrop{background:#30212699;backdrop-filter:blur(5px)}
+.rules-inner{padding:clamp(20px,4vw,38px)}
+.rules-kicker{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:#986873;font-weight:700}
+.rules-heading{font:italic clamp(31px,5vw,43px)/1.05 var(--serif);font-weight:400;margin:8px 0 7px}
+.rules-intro{font-size:12px;color:#8b7779;margin:0 0 22px}
+.rules-list{display:grid;gap:0;max-height:48svh;overflow:auto;padding-right:7px}
+.rule-item{padding:13px 0;border-top:1px solid #eadbd6}
+.rule-item h3{font:italic 20px/1.15 var(--serif);font-weight:400;color:#80545e;margin:0 0 5px}
+.rule-item p{font-size:12px;line-height:1.65;color:#6f5d60;margin:0}
+.rules-thanks{font:italic 17px var(--serif);color:#80545e;margin:18px 0}
+.rules-accept{display:flex;align-items:flex-start;gap:10px;padding:14px;background:#f5e9e5;font-size:12px;line-height:1.5;cursor:pointer}
+.rules-accept input{accent-color:#80545e;width:17px;height:17px;flex:0 0 auto;margin:1px 0 0}
+.rules-actions{display:flex;gap:10px;margin-top:14px}
+.rules-actions button{flex:1;min-height:46px;padding:11px 14px;border:1px solid #80545e;font:700 9px var(--sans);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.rules-cancel{background:transparent;color:#80545e}
+.rules-confirm{background:#80545e;color:white}
+.rules-confirm:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:560px){.rules-dialog{max-height:92svh}.rules-list{max-height:43svh}.rules-actions{flex-direction:column-reverse}.rule-item{padding:11px 0}}
+
 </style>
 </head>
 <body>
@@ -115,6 +137,31 @@ main{padding-top:0}
 <article class="shop-card"><div class="shop-visual product-gallery"><img class="product-photo lash-main" src="assets/products/IMG_9903.jpeg" alt="Whipped Shampoo Lash Bath by Lola"></div><div class="shop-info"><div><h3>Whipped Shampoo</h3></div><div class="price">20 €</div></div></article>
 </div></div></section>
 </main>
+
+<dialog class="rules-dialog" id="rules-dialog" aria-labelledby="rules-title">
+ <div class="rules-inner">
+  <div class="rules-kicker">Extensions Ciglia Verbania · Prima di prenotare</div>
+  <h2 class="rules-heading" id="rules-title">Le regole del tuo appuntamento</h2>
+  <p class="rules-intro">Ti chiedo di leggere con attenzione queste indicazioni prima di inviare la richiesta.</p>
+  <div class="rules-list">
+   <section class="rule-item"><h3>01 · Puntualità</h3><p>Vi chiedo di arrivare puntuali all’orario stabilito, non in anticipo, per permettermi di organizzare al meglio ogni appuntamento.</p></section>
+   <section class="rule-item"><h3>02 · Disdette</h3><p>In caso di disdetta comunicata il giorno stesso dell’appuntamento, sarà richiesto il pagamento del 50% del trattamento prenotato. In caso di mancato pagamento, non sarà possibile fissare nuovi appuntamenti.</p></section>
+   <section class="rule-item"><h3>03 · Cura delle ciglia</h3><p>Per mantenere le extension pulite, belle e durature, l’utilizzo dello shampoo specifico per ciglia è obbligatorio. Una corretta pulizia è fondamentale per la salute delle vostre ciglia naturali e per la durata del trattamento.</p></section>
+   <section class="rule-item"><h3>04 · Telefono durante la seduta</h3><p>Durante il trattamento vi chiedo gentilmente di mantenere il telefono in modalità silenziosa, così da favorire un momento di tranquillità e concentrazione e garantire un risultato ancora più preciso e impeccabile.</p></section>
+   <section class="rule-item"><h3>05 · Tempi del refill</h3><p>Superate le 2-3 settimane, il trattamento non sarà più considerato un refill, ma un nuovo impianto completo, in quanto è necessario ripartire da zero.</p></section>
+   <section class="rule-item"><h3>06 · Nessuna fretta durante il trattamento</h3><p>Anche se prenotate un refill, vi chiedo di non avere fretta o impegni subito dopo. Ogni trattamento richiede calma, attenzione e precisione per garantirvi il miglior risultato possibile.</p></section>
+   <section class="rule-item"><h3>07 · No accompagnatori</h3><p>Per garantire tranquillità, igiene e concentrazione durante il lavoro, non sono ammessi accompagnatori.</p></section>
+   <section class="rule-item"><h3>08 · Ritardi</h3><p>Vi chiedo gentilmente di evitare ritardi superiori ai 15 minuti. Ritardi eccessivi potrebbero compromettere gli appuntamenti delle clienti successive. In caso di ritardo importante, il trattamento potrebbe non poter essere effettuato.</p></section>
+  </div>
+  <p class="rules-thanks">Grazie per la comprensione e per il rispetto del mio lavoro e del tempo di tutte le clienti. ✨</p>
+  <label class="rules-accept"><input id="rules-checkbox" type="checkbox"><span>Ho letto e accetto tutte le regole dell’appuntamento.</span></label>
+  <div class="rules-actions">
+   <button class="rules-cancel" id="rules-cancel" type="button">Torna indietro</button>
+   <button class="rules-confirm" id="rules-confirm" type="button" disabled>Accetto e invio richiesta</button>
+  </div>
+ </div>
+</dialog>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
@@ -125,6 +172,8 @@ main{padding-top:0}
  const $=id=>document.getElementById(id);
  const service=$("service"), grid=$("days-grid"), monthLabel=$("month-label"), help=$("calendar-help");
  const times=$("time-list"), submit=$("booking-submit"), status=$("booking-status"), form=$("booking-form");
+ const rulesDialog=$("rules-dialog"), rulesCheckbox=$("rules-checkbox"), rulesConfirm=$("rules-confirm"), rulesCancel=$("rules-cancel");
+ let rulesAccepted=false;
  const today=new Date(); today.setHours(0,0,0,0);
  let month=new Date(today.getFullYear(),today.getMonth(),1), selectedDate=null, selectedSlot=null, services=[];
  const pad=n=>String(n).padStart(2,"0");
@@ -173,8 +222,12 @@ main{padding-top:0}
   }catch(e){times.innerHTML='<span class="calendar-help">Errore di connessione.</span>';status.textContent=e.message;}
  }
  service.addEventListener("change",loadSlots);
+ rulesCheckbox.addEventListener("change",()=>{rulesConfirm.disabled=!rulesCheckbox.checked;});
+ rulesCancel.addEventListener("click",()=>{rulesDialog.close();rulesCheckbox.checked=false;});
+ rulesConfirm.addEventListener("click",()=>{if(!rulesCheckbox.checked)return;rulesAccepted=true;rulesDialog.close();form.requestSubmit();});
+ rulesDialog.addEventListener("click",e=>{if(e.target===rulesDialog){rulesDialog.close();rulesCheckbox.checked=false;}});
  form.addEventListener("submit",async e=>{
-  e.preventDefault();if(!selectedSlot)return;submit.disabled=true;status.textContent="Invio richiesta…";
+  e.preventDefault();if(!rulesAccepted){rulesCheckbox.checked=false;rulesConfirm.disabled=true;rulesDialog.showModal();return;}if(!selectedSlot)return;submit.disabled=true;status.textContent="Invio richiesta…";
   try{const payload={service_id:service.value,starts_at:selectedSlot.starts_at,customer_name:form.elements.customer_name.value.trim(),customer_instagram:form.elements.customer_instagram.value.trim(),notes:form.elements.notes.value.trim()};
    const r=await fetch(api+"/public/appointments",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
    const data=await r.json();if(!r.ok)throw Error(data.error||"Prenotazione non riuscita");
