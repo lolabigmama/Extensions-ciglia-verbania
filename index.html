@@ -240,15 +240,16 @@ body{background:#f7f4ef;color:#292522}
     if(services.some(s=>s.id===current))service.value=current;
    }
   }catch(e){help.textContent="Non riesco ad aggiornare il listino in questo momento. Puoi comunque selezionare il trattamento; gli orari verranno caricati appena il calendario risponde.";}
+  if(selectedDate)loadSlots();
  }
  async function loadSlots(){
   selectedSlot=null;submit.disabled=true;times.innerHTML="";status.textContent="";
   if(!selectedDate){help.textContent="Scegli un giorno per vedere gli orari disponibili.";return;}
-  if(!service.value){help.textContent="Seleziona un trattamento.";return;}
+  if(!services.length){help.textContent="Caricamento degli orari disponibili…";times.innerHTML='<span class="calendar-help">Caricamento…</span>';return;}
   help.textContent=new Date(selectedDate+"T12:00:00").toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
   times.innerHTML='<span class="calendar-help">Caricamento…</span>';
   try{
-   const q=new URLSearchParams({service_id:service.value,date:selectedDate});
+   const q=new URLSearchParams({service_id:services[0].id,date:selectedDate});
    const r=await fetch(api+"/public/availability?"+q);if(!r.ok)throw Error("Disponibilità non raggiungibili");
    const data=await r.json();times.innerHTML="";
    if(!data.slots?.length){times.innerHTML='<span class="calendar-help">Nessun orario disponibile per questa data.</span>';return;}
@@ -261,7 +262,7 @@ body{background:#f7f4ef;color:#292522}
  rulesConfirm.addEventListener("click",()=>{if(!rulesCheckbox.checked)return;rulesAccepted=true;rulesDialog.close();form.requestSubmit();});
  rulesDialog.addEventListener("click",e=>{if(e.target===rulesDialog){rulesDialog.close();rulesCheckbox.checked=false;}});
  form.addEventListener("submit",async e=>{
-  e.preventDefault();if(!rulesAccepted){rulesCheckbox.checked=false;rulesConfirm.disabled=true;rulesDialog.showModal();return;}if(!selectedSlot)return;submit.disabled=true;status.textContent="Invio richiesta…";
+  e.preventDefault();if(!service.value){status.textContent="Seleziona il trattamento per completare la prenotazione.";return;}if(!selectedSlot)return;if(!rulesAccepted){rulesCheckbox.checked=false;rulesConfirm.disabled=true;rulesDialog.showModal();return;}submit.disabled=true;status.textContent="Invio richiesta…";
   try{const payload={service_id:service.value,starts_at:selectedSlot.starts_at,customer_name:form.elements.customer_name.value.trim(),customer_instagram:form.elements.customer_instagram.value.trim(),notes:form.elements.notes.value.trim()};
    const r=await fetch(api+"/public/appointments",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
    const data=await r.json();if(!r.ok)throw Error(data.error||"Prenotazione non riuscita");
